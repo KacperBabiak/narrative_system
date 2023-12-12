@@ -1,0 +1,419 @@
+/////////////////////////////////////types
+
+
+type location;
+type character : location;
+type place : location;
+type item : location;
+type valuable : item ;
+type healing : item ;
+type weapon : item ;
+
+
+///////////////////////////////////entity
+
+
+entity actor : character;
+entity soldier : character;
+entity doctor : character;
+entity thief : character;
+entity mc : character;
+entity tumblr : character;
+//entity char1 : character;
+//entity char2 : character;
+
+
+entity alcohol : item;
+
+entity gold : valuable;
+entity diamond : valuable;
+
+entity first_aid : healing;
+entity gun : weapon;
+
+//////////////////////////////////property
+
+
+//character
+property health(character : character) : number;
+property at(object : location) : location;
+property wants(object : character, item : item) : boolean;
+property dangerous(character : location) : boolean;
+property allied(character1: character, character2 : character) : boolean;
+property did_something(char: character) : number;
+property wants_revenge_on(character1: character, character2 : character) : boolean;
+
+//property previous_at(object : location) : location;
+//property controllable(character : character) : boolean;
+//property has_money(character : character) : number;
+//emotions
+property likes(character1: character, character2 : character) : number;
+property trusts(character1: character, character2 : character) : number;
+property fears(character1: character, character2 : character) : number;
+
+//////////////////////////////////////init_properties
+
+
+at(alcohol) = soldier;
+at(gold) = mc;
+at(diamond) = actor;
+at(first_aid) = doctor;
+at(gun) = thief;
+
+
+health(thief) = 100;
+likes(thief, doctor) = 15;
+likes(thief, mc) = 15;
+likes(thief, soldier) = -15;
+likes(thief, actor) = 45;
+likes(thief, tumblr) = 5;
+trusts(thief, mc) = 15;
+trusts(thief, doctor) = 35;
+trusts(thief, soldier) = -15;
+trusts(thief, actor) = 35;
+trusts(thief, tumblr) = 5;
+fears(thief, mc) = 5;
+fears(thief, doctor) = 5;
+fears(thief, soldier) = 20;
+fears(thief, actor) = 5;
+fears(thief, tumblr) = 0;
+
+health(doctor) = 100;
+likes(doctor, mc) = 35;
+likes(doctor, thief) = 20;
+likes(doctor, soldier) = 15;
+likes(doctor, actor) = 30;
+likes(doctor, tumblr) = 5;
+trusts(doctor, mc) = 35;
+trusts(doctor, thief) = 25;
+trusts(doctor, soldier) = 20;
+trusts(doctor, actor) = 15;
+trusts(doctor, tumblr) = 5;
+fears(doctor, mc) = 0;
+fears(doctor, thief) = 0;
+fears(doctor, soldier) = 10;
+fears(doctor, actor) = 5;
+fears(doctor, tumblr) = 5;
+wants(doctor,alcohol);
+
+health(soldier) = 100;
+dangerous(soldier);
+likes(soldier, mc) = 0;
+likes(soldier, thief) = 10;
+likes(soldier, doctor) = 35;
+likes(soldier, actor) = -5;
+likes(soldier, tumblr) = 5;
+trusts(soldier, mc) = 5;
+trusts(soldier, thief) = 5;
+trusts(soldier, doctor) = 20;
+trusts(soldier, actor) = -15;
+trusts(soldier, tumblr) = 5;
+fears(soldier, mc) = 0;
+fears(soldier, thief) = 0;
+fears(soldier, doctor) = 0;
+fears(soldier, actor) = 0;
+fears(soldier, tumblr) = 25;
+
+health(actor) = 100;
+likes(actor, mc) = 10;
+likes(actor, thief) = 20;
+likes(actor, doctor) = 35;
+likes(actor, soldier) = 5;
+likes(actor, tumblr) = 5;
+trusts(actor, mc) = 15;
+trusts(actor, thief) = 15;
+trusts(actor, doctor) = 45;
+trusts(actor, soldier) = 25;
+trusts(actor, tumblr) = 5;
+fears(actor, mc) = 15;
+fears(actor, thief) = 15;
+fears(actor, doctor) = 5;
+fears(actor, soldier) = 25;
+fears(actor, tumblr) = 5;
+
+health(tumblr) = 100;
+likes(tumblr, mc) = 50;
+likes(tumblr, thief) = 5;
+likes(tumblr, doctor) = 5;
+likes(tumblr, soldier) = 5;
+likes(tumblr, actor) = 5;
+trusts(tumblr, mc) = 5;
+trusts(tumblr, thief) = 5;
+trusts(tumblr, doctor) = 5;
+trusts(tumblr, soldier) = 5;
+trusts(tumblr, actor) = 5;
+fears(tumblr, mc) = 0;
+fears(tumblr, thief) = 0;
+fears(tumblr, doctor) = 0;
+fears(tumblr, soldier) = 0;
+fears(tumblr, actor) = 0;
+
+////////////////////////////////////////actions
+
+
+
+action take(taker : character,item : item,  giver : character) {
+	precondition:
+		giver != taker &
+        health(taker) != 0 &
+        at(item) == giver &
+		fears(taker,giver) < 30;
+	effect:
+		did_something(taker) = did_something(taker) + 1 &
+		if(dangerous(taker)) (health(giver) = health(giver) - 40) 
+		else (health(giver) = health(giver) - 15) &
+		if(dangerous(giver)) (health(taker) = health(taker) - 40) &
+		if(allied(giver,taker)) 
+			(!allied(giver,taker) & !allied(taker,giver) & wants_revenge_on(giver,taker)) &
+		trusts(giver,taker) = trusts(giver,taker) - 70 &
+		trusts(taker,giver) = trusts(taker,giver) - 50 &
+		likes(giver,taker) = likes(giver,taker) - 70 &
+		fears(taker,giver) = fears(taker,giver) - 5 &
+		fears(giver,taker) = fears(giver,taker) + 5 &
+		at(item) = taker ;
+	consenting: taker;
+	observing(c : character) : health(c) != 0 ;
+};
+
+
+action give(giver : character, item: item, taker : character) {
+	precondition:
+		giver != taker &
+		health(giver) != 0  &
+        health(taker) != 0 &
+        at(item) == giver ;
+	effect:
+		did_something(giver) =  did_something(giver) + 1 &
+		//did_something(taker) =  did_something(taker) + 1 &
+		at(item) = taker &
+		if(wants(taker,item)) 
+		(trusts(taker,giver) = trusts(taker,giver) + 10 &
+		likes(taker,giver) = trusts(taker,giver) + 10 &
+		trusts(giver,taker) = trusts(giver,taker) + 5 &
+		likes(giver,taker) = likes(giver,taker) +5 &
+		fears(taker,giver) = fears(taker,giver) - 5
+		);
+		
+	consenting: giver,taker;
+	observing(c : character) : health(c) != 0 ;
+};
+
+
+action exchange(giver : character, item1: item, item2 : item, taker : character) {
+	precondition:
+		item1 != item2 &
+		giver != taker &
+		health(giver) != 0  &
+        health(taker) != 0 &
+        at(item1) == giver &
+        at(item2) == taker ;
+	effect:
+		
+		did_something(giver) =  did_something(giver) + 1 &
+		did_something(taker) =  did_something(taker) + 1 &
+		at(item1) = taker &
+		at(item2) = giver &
+		trusts(taker,giver) = trusts(taker,giver) + 5 &
+		likes(taker,giver) = trusts(taker,giver) + 2 &
+		trusts(giver,taker) = trusts(giver,taker) + 5 &
+		likes(giver,taker) = likes(giver,taker) + 2 &
+		fears(taker,giver) = fears(taker,giver) - 5 &
+		fears(giver,taker) = fears(giver,taker) - 5 &;
+		
+	consenting: giver,taker;
+	observing(c : character) : health(c) != 0 ;
+};
+
+
+
+action ally(taker : character, giver : character) {
+	precondition:
+		giver != taker &
+		health(giver) != 0  &
+        health(taker) != 0 &
+		trusts(giver,taker) > 18 &
+        !(allied(taker,giver))&
+		fears(taker,giver)<20 &
+		!wants_revenge_on(taker,giver)&
+		!wants_revenge_on(giver,taker);
+
+	effect:
+		did_something(taker) = did_something(taker) + 1 &
+		if(dangerous(taker)) dangerous(giver) &
+		if(dangerous(giver)) dangerous(taker) &
+		trusts(giver,taker) = trusts(giver,taker)+20 &
+		likes(giver,taker) = likes(giver,taker) +20 &
+		trusts(taker,giver) = trusts(taker,giver) +20 &
+		likes(taker,giver) = likes(taker,giver) +20 &
+		allied(taker, giver) &
+		allied(giver,taker);
+		 
+	consenting: taker;
+	observing(c : character) : health(c) != 0 ;
+};
+
+
+action gossip(starter : character, hearing : character, about : character) {
+	precondition:
+		starter != hearing &
+		starter != about &
+		about != hearing &
+		health(hearing) != 0  &
+        health(starter) != 0 &
+		trusts(hearing,starter) > 25 
+        ;
+
+	effect:
+		did_something(starter) = did_something(starter) + 1 &
+		trusts(hearing,about) = trusts(hearing,about) - 20 &
+		likes(hearing,about) = likes(hearing,about) - 20 
+		;
+		 
+	consenting: starter;
+	observing(c : character) : health(c) != 0 ;
+};
+
+
+action rest(char : character) {
+	precondition:
+		health(char) < 100;
+
+	effect:
+		did_something(char) = did_something(char) + 1 &
+		health(char) = health(char) + 20;
+		 
+	consenting: char;
+	
+};
+
+action heal(char : character, other : character, heal : healing) {
+	precondition:
+		health(other) < 100 &
+		at(heal) == char;
+
+	effect:
+		did_something(char) = did_something(char) + 1 &
+		health(other) = health(other) + 40 &
+		at(heal) = ? &
+		fears(char,other) = fears(char,other) - 20 ;
+		 
+	consenting: char;
+	
+};
+
+action intimidate(char : character, other : character) {
+	precondition:
+		char != other &
+		health(char) != 0  &
+        health(other) != 0;
+	effect:
+		did_something(char) = did_something(char) + 1 &
+		wants_revenge_on(other, char) &
+		if(dangerous(char)) 
+			(fears(other,char) = fears(other,char) + 20)
+		else (fears(other,char) = fears(other,char) + 10);
+	consenting: char;
+};
+
+
+action take_revenge(char : character, other : character){
+	precondition:
+		health(char) > 0 &
+		health(other) > 0 &
+		char != other &
+		wants_revenge_on(char,other) &
+		fears(char,other) < 20 &
+		likes(char,other) < 30;
+		
+	effect:
+		did_something(char) = did_something(char) + 1 &
+
+		if(dangerous(other)) 
+			(health(char) = health(char) - 20) 
+		else 
+			(health(char) = health(char) - 15) &
+
+		if(dangerous(char)) 
+			(health(other) = health(other) - 40) 
+		else 
+			(health(other) = health(other) - 30)
+		&
+		if(allied(char,other)) 
+			(!allied(char,other) & !allied(other,char) & wants_revenge_on(other,char)) &
+		trusts(other,char) = trusts(other,char) - 50 &
+		likes(other,char) = likes(other,char) - 50 &
+		fears(other,char) = fears(other,char) + 10 &
+		fears(char,other) = fears(char,other) - 10 ;
+	consenting: char;
+};
+
+//postacie musza chciec sie zemscic
+//wartośc przedmiotw
+//zwiekszenie wartości pomiędzy rundami, nie tylko utrzymanie
+//minimalne i maksymalne wartosci
+//kradziez - tylko jesli umiejetnosci albo cała mechanika kradziezy z podejrzewaniem itd.
+//Otwieranie
+//rozkazywanie
+//ogólne emocje
+//zlość na kogoś
+//nazywanie relacji - to już w grze?
+
+
+//////////////////////////triggers
+
+trigger disband_alliance(char : character, other : character){
+	precondition:
+		allied(char,other) &
+		trusts(char,other) < 18;
+		
+	effect:
+		!allied(char,other) &
+		!allied(other, char);
+};
+
+
+trigger is_dangerous(char : character, w : weapon){
+	precondition:
+		health(char) > 0 &
+		!dangerous(char) &
+		at(w) == char;
+		
+	effect:
+		dangerous(char);
+};
+
+
+
+
+
+//////////////////utility
+
+utility(): (did_something(doctor) + did_something(thief) + did_something(actor) + did_something(soldier) + did_something(tumblr) > 4 );
+	//(did_something(doctor) == 1 & did_something(thief) == 1 & did_something(actor) == 1 & did_something(soldier) == 1 )  ;
+
+
+
+utility(doctor):
+	(sum(c : character) trusts(doctor, c))  + if (at(alcohol)== doctor) 5 else 0;
+
+utility(thief):
+	//if (at(alcohol)== thief) 30 else 0;
+	(sum(v : valuable) if(at(v) ==thief) 1 else 0);
+
+utility(actor):
+	(sum(c : character) likes(c, actor));
+
+//zastraszanie
+utility(soldier):
+	(sum(c : character) fears(c, soldier));
+
+utility(tumblr):
+	did_something(tumblr) == 1;
+
+
+//postac manipulujaca
+//1 - (sum(c : character) likes(c, doctor));
+
+
+
+

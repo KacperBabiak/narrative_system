@@ -1,0 +1,446 @@
+/////////////////////////////////////types
+
+//zmien na domyslne typy?
+type object;
+type character : object;
+type place : object;
+type item : object;
+type weapon : item;
+type key : item;
+
+
+///////////////////////////////////entity
+
+
+entity alko : character;
+entity soldier : character;
+entity doctor : character;
+entity thief : character;
+//entity mastermind : character;
+entity mc : character;
+
+entity bar : place;
+entity kitchen : place;
+entity casino : place;
+entity saferoom : place;
+
+entity gun : weapon;
+entity knife : weapon;
+
+entity safe_key : key;
+entity saferoom_key : key;
+
+entity safe : item;
+entity valuable : item;
+entity alcohol : item;
+
+//////////////////////////////////property
+
+
+//character
+property alive(character : character) : boolean;
+property at(object : object) : object;
+//property has(character : character) : item;
+property has_money(character : character) : number;
+property armed(character : character) : boolean;
+property occupied(character : character) : boolean;
+property controllable(character : character) : boolean;
+//property alone(character : character) : boolean;
+//property paired(character : character, character2 : character) : boolean;
+property killed_by(character : character) : character;
+property crime_seen(character : character) : boolean;
+
+
+//place
+property fun_place(place : place) : boolean;
+property connected_to(place : place, place2 : place) : boolean;
+
+//object
+property closed(object : object) : boolean;
+
+//item
+property opens(key : key) : object;
+
+//////////////////////////////////////init_properties
+connected_to(casino,saferoom) ;
+connected_to(saferoom,casino) ;
+
+connected_to(casino,kitchen);
+connected_to(kitchen,casino);
+
+connected_to(casino,bar);
+connected_to(bar,casino);
+
+connected_to(kitchen,bar) ;
+connected_to(bar,kitchen) ;
+
+fun_place(casino);
+closed(saferoom);
+closed(safe);
+opens(safe_key) = safe;
+opens(saferoom_key) = saferoom;
+at(safe) = saferoom;
+at(valuable) = safe;
+
+
+
+
+alive(thief);
+at(thief) = casino;
+at(safe_key) = thief;
+at(saferoom_key) = thief;
+has_money(thief) = 0;
+controllable(thief);
+
+
+alive(doctor);
+at(doctor) = kitchen;
+has_money(doctor) = 0;
+controllable(doctor);
+
+alive(alko);
+at(alko) = casino;
+has_money(alko) = 2;
+controllable(alko);
+at(gun) = alko;
+
+
+alive(soldier);
+at(soldier) = casino;
+at(knife) = soldier;
+at(alcohol) = soldier;
+has_money(soldier) = 2;
+controllable(soldier);
+
+alive(mc);
+at(mc) = casino;
+at(alcohol) = mc;
+has_money(mc) = 2;
+!controllable(mc);
+
+/*
+alive(mastermind);
+at(mastermind) = kitchen;
+at(gun) = mastermind;
+has_money(mastermind) = 0;
+!controllable(mastermind);
+
+
+
+
+
+
+
+
+
+
+*/
+
+////////////////////////////////////////actions
+
+
+action travel(character : character, from : place, to : place) {
+	precondition:
+		from != to &
+		alive(character)  &
+		at(character) == from &
+		!closed(to) &
+        connected_to(from,to);
+	effect:
+		at(character) = to;
+	consenting: character;
+	observing(c : character) : alive(c) & (at(c) == from | at(c) == to);
+};
+
+
+action give(giver : character, item: item, taker : character, place : place) {
+	precondition:
+		giver != taker &
+		alive(giver)  &
+        alive(taker) &
+		at(taker) == place &
+        at(giver) == place &
+        at(item) == giver &
+        controllable(giver) ;
+	effect:
+		at(item) = taker;
+	consenting: giver;
+	observing(c : character) : alive(c) & at(c) == place ;
+};
+
+
+action buy(buyer : character, item: item, seller : character, place : place) {
+	precondition:
+		buyer != seller &
+		alive(buyer)  &
+        alive(seller) &
+		at(seller) == place &
+        at(buyer) == place &
+        at(item) == seller &
+        controllable(buyer) &
+        has_money(buyer) != 0;
+	effect:
+		at(item) = buyer &
+        has_money(seller) = has_money(seller) + 1 &
+        has_money(buyer) = has_money(buyer) - 1;
+	consenting: buyer;
+	observing(c : character) : alive(c) & at(c) == place ;
+};
+
+
+action give_money(giver : character,  taker : character, place : place) {
+	precondition:
+		giver != taker &
+		alive(giver)  &
+        alive(taker) &
+		at(taker) == place &
+        at(giver) == place &
+        controllable(giver) &
+        has_money(giver) != 0;
+	effect:
+        has_money(taker) = has_money(taker) + 1 &
+        has_money(giver) = has_money(giver) - 1;
+	consenting: giver;
+	observing(c : character) : alive(c) & at(c) == place;
+};
+
+
+action take(giver : character,item : item,  taker : character, place : place) {
+	precondition:
+		giver != taker &
+        alive(taker) &
+		at(taker) == place &
+        at(giver) == place &
+        controllable(taker) &
+        at(item) == giver &
+        (
+            !alive(giver) |
+            (armed(taker) & !armed(giver))
+        ) ;
+        //paired(giver,taker);
+
+	effect:
+		at(item) = taker;
+	consenting: taker;
+	observing(c : character) : alive(c) & at(c) == place;
+};
+
+
+action take_money(giver : character,  taker : character, place : place) {
+	precondition:
+		giver != taker &
+        alive(taker) &
+		at(taker) == place &
+        at(giver) == place &
+        controllable(giver) &
+        has_money(giver) != 0 &
+        (
+            !alive(giver) |
+            occupied(giver) |
+            (armed(taker) & !armed(giver))
+        ) ;
+        //paired(giver,taker);
+	effect:
+        has_money(taker) = has_money(taker) + 1 &
+        has_money(giver) = has_money(giver) - 1;
+	consenting: taker;
+	observing(c : character) : alive(c) &  at(c) == place;
+};
+
+
+action take_out_of(taker : character, item: item, container : item, place : place) {
+	precondition:
+		alive(taker)  &
+        at(taker) == place &
+        at(item) == container &
+        at(container) == place &
+        controllable(taker) &
+        !closed(container);
+	effect:
+		at(item) = taker ;
+	consenting: taker;
+	observing(c : character) : alive(c) & at(c) == place;
+};
+
+action steal(giver : character,item : item,  taker : character, place : place) {
+	precondition:
+		giver != taker &
+        alive(taker) &
+        alive(giver) &
+		at(taker) == place &
+        at(giver) == place &
+        controllable(giver) &
+        at(item) == giver &
+        //paired(giver,taker) &
+        occupied(giver);
+
+	effect:
+		at(item) = taker ;
+	consenting: taker;
+	observing(c : character) : alive(c) & at(c) == place;
+};
+
+
+
+action kill(killer : character,  victim : character, place : place) {
+	precondition:
+		killer != victim &
+        alive(killer) &
+        alive(victim) &
+		at(killer) == place &
+        at(victim) == place &
+        controllable(killer) &
+        //paired(killer,victim) &
+        occupied(victim) &
+        armed(killer);
+
+	effect:
+		!alive(victim) &
+        killed_by(victim) = killer ;
+	consenting: killer;
+	observing(c : character) : alive(c) & at(c) == place;
+};
+
+action invite(invited : character, inviter : character, from : place, to : place) {
+	precondition:
+		invited != inviter &
+		from != to &
+		alive(invited)  &
+        alive(inviter)  &
+		at(inviter) == from &
+        controllable(inviter) &
+        !closed(to);
+	effect:
+		at(invited) = to;
+	consenting: inviter;
+	observing(c : character) : alive(c) & (at(c) == from | at(c) == to);
+};
+
+action open_room(opener : character, key : key ,room : place, place : place) {
+	precondition:
+		alive(opener)  &
+		at(opener) == place &
+        at(key) == opener &
+        controllable(opener) &
+        closed(room) &
+        opens(key) == room &
+        connected_to(room,place) ;
+
+	effect:
+		!closed(room);
+	consenting: opener;
+	observing(c : character) : alive(c) & (at(c) == room | at(c) == place);
+};
+
+
+action open_item(opener : character, key : key ,item : item, place : place) {
+	precondition:
+		alive(opener)  &
+		at(opener) == place &
+        at(item) == place &
+        at(key) == opener &
+        controllable(opener) &
+        closed(item) &
+        opens(key) == item;
+
+	effect:
+		!closed(item);
+	consenting: opener;
+	observing(c : character) : alive(c) & at(c) == place;
+};
+
+//////////////////////////triggers
+
+//dodaj nowe trigery
+
+
+trigger occupied(character : character,  place : place) {
+	precondition:
+		alive(character) &
+		at(character) == place &
+        fun_place(place) &
+        !occupied(character);
+        
+
+	effect:
+        occupied(character);
+		
+};
+
+trigger not_occupied(character : character,  place : place) {
+	precondition:
+		alive(character) &
+		at(character) == place &
+        !fun_place(place) &
+        occupied(character);
+        
+
+	effect:
+        !occupied(character);
+		
+};
+
+
+
+
+trigger armed(character : character) {
+	precondition:
+		alive(character) &
+        !armed(character) &
+        exists(w : weapon) 
+            (at(w) == character)
+        ;
+
+	effect:
+        armed(character)  ;
+		
+};
+
+
+trigger not_armed(character : character) {
+	precondition:
+		alive(character) &
+        armed(character) &
+        forall(w : weapon) 
+            (at(w) != character)
+        ;
+
+	effect:
+        !armed(character)  ;
+		
+};
+
+
+
+//////////////////utility
+
+utility():
+	(if(at(thief) == saferoom & at(alcohol) == alko & at(gun) == soldier)
+		1
+	else
+		0) ;
+
+
+
+utility(thief):
+	(if(at(thief) == saferoom  )
+		1
+	else
+		0) ;
+
+utility(alko):
+	(if(at(alcohol) == alko  )
+		1
+	else
+		0) ;
+
+utility(soldier):
+	(if(at(gun) == soldier )
+		1
+	else
+		0) ;
+
+
+
+
+
