@@ -1,0 +1,751 @@
+/////////////////////////////////////types
+
+
+type object;
+type character : object;
+type item : object;
+
+
+///////////////////////////////////entity
+
+
+//properties
+property health(character : character) : number;
+property points(character : character) : number;
+property has(character : character, item : item) : number;
+property did_something(char: character) : number;
+property happiness(character : character) : number;
+property altruism(character : character) : number;
+property ambition(character : character) : number;
+
+//emotions towards other characters
+property likes(character1: character, character2 : character) : number;
+property trusts(character1: character, character2 : character) : number;
+
+//////////////////////////////////////init_properties
+entity actor : character;
+entity it : item;
+
+health(actor) = 100;
+has(actor,it) = 1;
+happiness(actor) = 0;
+altruism(actor) = 15;
+likes(actor,doctor) = 1;
+likes(actor,agent) = 15;
+
+
+entity doctor : character;
+health(doctor) = 100;
+altruism(doctor) = 15;
+
+
+entity agent : character;
+health(agent) = 100;
+
+
+
+entity test : character;
+health(test) = 100;
+altruism(test) = 15;
+
+
+entity test2 : character;
+health(test2) = 100;
+altruism(test2) = 15;
+
+entity test3 : character;
+health(test3) = 100;
+altruism(test3) = 15;
+
+////////////////////////////////////////actions
+
+//items
+
+action give(char : character, other: character, item : item) {
+	precondition:
+		char != other
+
+		&has(char, item) > 0
+
+		&health(char) > 0
+		&health(other) > 0
+		
+	
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		&did_something(other) = did_something(other) + 1
+		&has(char, item) = has(char, item) - 1
+		&has(other, item) = has(other, item) + 1
+		
+		&happiness(char) =(happiness(char) + likes(char,other))
+		&altruism(char) = (altruism(char)+  1)
+		&likes(char,other) =(likes(char,other) +  1)
+		
+		&happiness(other) =happiness(other) + 3
+		&altruism(other) = altruism(other)+  3
+
+		&likes(other,char) =likes(other,char) +  2
+		&trusts(other,char) = trusts(other,char) + 2
+		
+		;
+	consenting: char,other;
+	
+};
+
+
+
+action take(char : character, other: character, item : item) {
+	precondition:
+		char != other
+		&has(other, item) > 0
+
+		&health(char) > 0
+		&health(other) > 0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+
+		&has(char, item) = has(char, item)  +1
+		&has(other, item) = has(other, item) - 1
+		
+		&happiness(char) =happiness(char) - (altruism(char)/5) - (likes(char,other)/5)
+		&altruism(char) = altruism(char) - 3
+		&ambition(char) = ambition(char) + 2
+		&trusts(char,other) = trusts(char,other) - 3
+
+
+		&happiness(other) =(happiness(other)  - 4)
+		&altruism(other) = altruism(other) - 3
+		&ambition(other) = ambition(other) + 1
+		&likes(other,char) =likes(other,char) -  4
+		&trusts(other,char) = trusts(other,char) - 4
+		
+		;
+	consenting: char;
+	
+};
+
+
+//dodaj value, maja rozne ceny
+action exchange(char : character, other: character, item1 : item, item2 :item) {
+	precondition:
+		char != other
+		&item1 !=item2
+		&has(char, item1) >0
+		&has(other, item2) >0
+	
+
+		&health(char) > 0
+		&health(other) > 0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		&did_something(other) = did_something(other) + 1
+
+
+		&has(char, item1) = has(char, item1) - 1
+		&has(other, item1) = has(other, item1) + 1
+
+		&has(char, item2) = has(char, item2) + 1
+		&has(other, item2) = has(other, item2) - 1
+		
+		&happiness(char) =happiness(char) +1
+		&altruism(char) = altruism(char)+  1
+		&ambition(char) = ambition(char) + 1
+		&likes(char,other) =likes(char,other) +  1
+		&trusts(char,other) = trusts(char,other) + 2
+
+
+		&happiness(other) =happiness(other) +1
+		&altruism(other) = altruism(other)+  1
+		&ambition(other) = ambition(other) + 1
+		&likes(other,char) =likes(other,char) +  1
+		&trusts(other,char) = trusts(other,char) + 2
+		
+		;
+	consenting: char,other;
+	
+};
+
+
+
+
+
+
+
+//talking
+action talk_ambition(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) > 0
+		&health(other) > 0
+		&ambition(char) > 13
+		
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		&happiness(char) = happiness(char) + (ambition(char)/8) + (likes(char,other)/8)
+		&ambition(char) = ambition(char) + 1
+		&likes(char,other) =likes(char,other) +  1
+
+
+
+		&happiness(other) = happiness(other) + (ambition(other)/8) + (likes(other,char)/8)
+		&ambition(other) = ambition(other) + 4
+		&likes(other,char) =likes(other,char) +  1
+		
+		
+		;
+	consenting: char;
+	
+};
+
+
+
+action talk_altruism(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) > 0
+		&health(other) > 0
+		&altruism(char) > 13
+		
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		&happiness(char) = happiness(char) + (altruism(char)/8) + (likes(char,other)/8)
+		&altruism(char) = altruism(char) + 1
+		&likes(char,other) =likes(char,other) +  1
+
+
+
+		&happiness(other) = happiness(other) + (altruism(other)/8) + (likes(other,char)/8)
+		&altruism(other) = altruism(other) + 4
+		&likes(other,char) =likes(other,char) +  1
+		
+		
+		;
+	consenting: char;
+	
+};
+
+
+
+action compliment(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) > 0
+		&health(other) > 0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		
+		&happiness(char) =happiness(char) +  (altruism(char)/7) + (likes(char,other)/7)
+		&altruism(char) = altruism(char)+  2
+		&likes(char,other) =likes(char,other) +  1
+		&trusts(char,other) = trusts(char,other) + 1
+
+
+		&happiness(other) =happiness(other) +  (altruism(other)/7) + (likes(other,char)/7) + 3
+		&altruism(other) = altruism(other)+  2
+		&likes(other,char) =likes(other,char) +  3
+		&trusts(other,char) = trusts(other,char) + 1
+		
+		;
+	consenting: char;
+	
+};
+
+
+action intimidate(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) > 0
+		&health(other) > 0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		&happiness(char) =happiness(char) -  (altruism(char)/7) - (likes(char,other)/7)
+		&altruism(char) = altruism(char)+  2
+		&trusts(char,other) = trusts(char,other) - 1
+
+
+		&happiness(other) =happiness(other) -  (altruism(other)/7) - (likes(other,char)/7) - 2
+		&altruism(other) = altruism(other) - 3
+		&likes(other,char) =likes(other,char) -  4
+		&trusts(other,char) = trusts(other,char) - 1
+		
+		;
+	consenting: char;
+
+};
+
+action gossip_about (char : character, other: character, about : character) {
+	precondition:
+		char != other
+		&other != about
+		&char !=about
+		&health(char) > 0
+		&health(other) > 0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+
+		&happiness(char) = happiness(char) - (altruism(char)/8)
+		&altruism(char) = altruism(char) - 1
+
+
+		&happiness(other) = happiness(other) - (altruism(other)/8)
+		&altruism(other) = altruism(other) - 1
+		&likes(other,char) =likes(other,char) +  1
+		&trusts(other,char) = trusts(other,char) - 1
+
+		&likes(other,about) =likes(other,about) - 2 - (trusts(other,char)/6)
+		&trusts(other,about) = trusts(other,about) - 2 - (trusts(other,char)/6)
+		
+		;
+	consenting: char;
+	
+};
+
+action praise_someone(char : character, other: character, about :character) {
+	precondition:
+		char != other
+		&other != about
+		&char !=about
+		&health(char) > 0
+		&health(other) > 0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		
+		&happiness(char) = happiness(char) + (altruism(char)/8)
+		&altruism(char) = altruism(char) + 1
+
+
+		&happiness(other) = happiness(other) + (altruism(other)/8)
+		&altruism(other) = altruism(other) + 1
+		&likes(other,char) =likes(other,char) +  1
+		&trusts(other,char) = trusts(other,char) + 1
+
+		&likes(other,about) =likes(other,about) + 2 + (trusts(other,char)/6)
+		&trusts(other,about) = trusts(other,about) + 2 + (trusts(other,char)/6)
+		
+		;
+	consenting: char;
+	
+};
+
+
+
+
+//special
+
+
+action attack(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) > 0
+		&points(char) > 0
+		&likes(char,other) < -13
+		&ambition(char) > 13
+		
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		&happiness(char) = happiness(char) - (altruism(char)/5) - (likes(char,other)/5)
+		&altruism(char) = altruism(char) -  4
+		&ambition(char) = ambition(char) + 3
+		&trusts(char,other) = trusts(char,other) - 2
+
+		&health(other) = health(other) - 10
+		&happiness(other) = happiness(other) - (altruism(other)/5) - 3
+		&altruism(other) = altruism(other) - 4
+		&ambition(other) = ambition(other) - 2
+		&likes(other,char) =likes(other,char) - 4
+		&trusts(other,char) = (trusts(other,char) - 4)
+		
+		;
+	consenting: char;
+	
+};
+
+
+
+
+action rest(char : character) {
+	precondition:
+		
+		health(char) > 0
+		
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		&health(char) = health(char) + 5
+		&happiness(char) =altruism(char) + 4
+		
+
+
+		
+		
+		;
+	consenting: char;
+	
+};
+
+action take_care_of(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) > 0
+		
+		
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		
+		&happiness(char) =happiness(char) + (altruism(char)/7) + (likes(char,other)/7)
+		&altruism(char) = altruism(char)+  2
+		&likes(char,other) =likes(char,other) +  2
+		&trusts(char,other) = trusts(char,other) + 1
+
+
+		&health(other) = health(other) + 10
+		&happiness(other) =altruism(other) + 5
+		&altruism(other) = altruism(other)+  4
+		&likes(other,char) =likes(other,char) +  5
+		&trusts(other,char) = trusts(other,char) + 2
+		
+		;
+	consenting: char;
+	
+};
+/*
+
+
+///teraz przetestuj wszystko i wymysl dokładnie co zbieraja, jesli wszystko działa to dodaj dalej i moze walka/wiedza/zbrodnie
+
+action poison(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) >= 0
+		&points(char) >= 0
+		&money(char) >= 0
+		&happiness(char) >=0
+		&altruism(char) >= 0
+		&ambition(char) >= 0
+		&likes(char,other) >=0
+		&trusts(char,other) >=0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		&health(char) = health(char) + 0
+		&points(char) = 0
+		&money(char) = 0
+		&happiness(char) =altruism(char) +0
+		&altruism(char) = altruism(char)+  0
+		&ambition(char) = ambition(char) + 0
+		&likes(char,other) =likes(char,other) +  0
+		&trusts(char,other) = trusts(char,other) + 0
+
+
+		&health(other) = health(other) + 0
+		&points(other) = 0
+		&money(other) = 0
+		&happiness(other) =altruism(other) +0
+		&altruism(other) = altruism(other)+  0
+		&ambition(other) = ambition(other) + 0
+		&likes(other,char) =likes(other,char) +  0
+		&trusts(other,char) = trusts(other,char) + 0
+		
+		;
+	consenting: char;
+	
+};
+
+
+action imprison(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) >= 0
+		&points(char) >= 0
+		&money(char) >= 0
+		&happiness(char) >=0
+		&altruism(char) >= 0
+		&ambition(char) >= 0
+		&likes(char,other) >=0
+		&trusts(char,other) >=0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		&health(char) = health(char) + 0
+		&points(char) = 0
+		&money(char) = 0
+		&happiness(char) =altruism(char) +0
+		&altruism(char) = altruism(char)+  0
+		&ambition(char) = ambition(char) + 0
+		&likes(char,other) =likes(char,other) +  0
+		&trusts(char,other) = trusts(char,other) + 0
+
+
+		&health(other) = health(other) + 0
+		&points(other) = 0
+		&money(other) = 0
+		&happiness(other) =altruism(other) +0
+		&altruism(other) = altruism(other)+  0
+		&ambition(other) = ambition(other) + 0
+		&likes(other,char) =likes(other,char) +  0
+		&trusts(other,char) = trusts(other,char) + 0
+		
+		;
+	consenting: char;
+	
+};
+
+
+action free(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) >= 0
+		&points(char) >= 0
+		&money(char) >= 0
+		&happiness(char) >=0
+		&altruism(char) >= 0
+		&ambition(char) >= 0
+		&likes(char,other) >=0
+		&trusts(char,other) >=0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		&health(char) = health(char) + 0
+		&points(char) = 0
+		&money(char) = 0
+		&happiness(char) =altruism(char) +0
+		&altruism(char) = altruism(char)+  0
+		&ambition(char) = ambition(char) + 0
+		&likes(char,other) =likes(char,other) +  0
+		&trusts(char,other) = trusts(char,other) + 0
+
+
+		&health(other) = health(other) + 0
+		&points(other) = 0
+		&money(other) = 0
+		&happiness(other) =altruism(other) +0
+		&altruism(other) = altruism(other)+  0
+		&ambition(other) = ambition(other) + 0
+		&likes(other,char) =likes(other,char) +  0
+		&trusts(other,char) = trusts(other,char) + 0
+		
+		;
+	consenting: char;
+	
+};
+
+///moving
+
+action travel(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) >= 0
+		&points(char) >= 0
+		&money(char) >= 0
+		&happiness(char) >=0
+		&altruism(char) >= 0
+		&ambition(char) >= 0
+		&likes(char,other) >=0
+		&trusts(char,other) >=0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		&health(char) = health(char) + 0
+		&points(char) = 0
+		&money(char) = 0
+		&happiness(char) =altruism(char) +0
+		&altruism(char) = altruism(char)+  0
+		&ambition(char) = ambition(char) + 0
+		&likes(char,other) =likes(char,other) +  0
+		&trusts(char,other) = trusts(char,other) + 0
+
+
+		&health(other) = health(other) + 0
+		&points(other) = 0
+		&money(other) = 0
+		&happiness(other) =altruism(other) +0
+		&altruism(other) = altruism(other)+  0
+		&ambition(other) = ambition(other) + 0
+		&likes(other,char) =likes(other,char) +  0
+		&trusts(other,char) = trusts(other,char) + 0
+		
+		;
+	consenting: char;
+	
+};
+
+
+action invite(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) >= 0
+		&points(char) >= 0
+		&money(char) >= 0
+		&happiness(char) >=0
+		&altruism(char) >= 0
+		&ambition(char) >= 0
+		&likes(char,other) >=0
+		&trusts(char,other) >=0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		&health(char) = health(char) + 0
+		&points(char) = 0
+		&money(char) = 0
+		&happiness(char) =altruism(char) +0
+		&altruism(char) = altruism(char)+  0
+		&ambition(char) = ambition(char) + 0
+		&likes(char,other) =likes(char,other) +  0
+		&trusts(char,other) = trusts(char,other) + 0
+
+
+		&health(other) = health(other) + 0
+		&points(other) = 0
+		&money(other) = 0
+		&happiness(other) =altruism(other) +0
+		&altruism(other) = altruism(other)+  0
+		&ambition(other) = ambition(other) + 0
+		&likes(other,char) =likes(other,char) +  0
+		&trusts(other,char) = trusts(other,char) + 0
+		
+		;
+	consenting: char;
+	
+};
+
+action lock(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) >= 0
+		&points(char) >= 0
+		&money(char) >= 0
+		&happiness(char) >=0
+		&altruism(char) >= 0
+		&ambition(char) >= 0
+		&likes(char,other) >=0
+		&trusts(char,other) >=0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		&health(char) = health(char) + 0
+		&points(char) = 0
+		&money(char) = 0
+		&happiness(char) =altruism(char) +0
+		&altruism(char) = altruism(char)+  0
+		&ambition(char) = ambition(char) + 0
+		&likes(char,other) =likes(char,other) +  0
+		&trusts(char,other) = trusts(char,other) + 0
+
+
+		&health(other) = health(other) + 0
+		&points(other) = 0
+		&money(other) = 0
+		&happiness(other) =altruism(other) +0
+		&altruism(other) = altruism(other)+  0
+		&ambition(other) = ambition(other) + 0
+		&likes(other,char) =likes(other,char) +  0
+		&trusts(other,char) = trusts(other,char) + 0
+		
+		;
+	consenting: char;
+	
+};
+
+action open(char : character, other: character) {
+	precondition:
+		char != other
+		&health(char) >= 0
+		&points(char) >= 0
+		&money(char) >= 0
+		&happiness(char) >=0
+		&altruism(char) >= 0
+		&ambition(char) >= 0
+		&likes(char,other) >=0
+		&trusts(char,other) >=0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1
+		
+		&health(char) = health(char) + 0
+		&points(char) = 0
+		&money(char) = 0
+		&happiness(char) =altruism(char) +0
+		&altruism(char) = altruism(char)+  0
+		&ambition(char) = ambition(char) + 0
+		&likes(char,other) =likes(char,other) +  0
+		&trusts(char,other) = trusts(char,other) + 0
+
+
+		&health(other) = health(other) + 0
+		&points(other) = 0
+		&money(other) = 0
+		&happiness(other) =altruism(other) +0
+		&altruism(other) = altruism(other)+  0
+		&ambition(other) = ambition(other) + 0
+		&likes(other,char) =likes(other,char) +  0
+		&trusts(other,char) = trusts(other,char) + 0
+		
+		;
+	consenting: char;
+	
+};
+*/
+//////////////////////////triggers
+
+
+//////////////////utility
+
+utility():
+	//happiness(actor);
+	(sum(c:character) (did_something(c))) ;
+
+
+utility(actor): 
+happiness(actor)>0;
+
+
+utility(agent): 
+(if(has(agent,it) > 0) 5 else 0) + (2* likes(actor,agent));
+
+
+
+

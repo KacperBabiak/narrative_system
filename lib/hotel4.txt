@@ -1,0 +1,316 @@
+///////////////////////////////////entity
+
+
+entity actor : character;
+entity science : character;
+entity doctor : character;
+entity agent : character;
+entity mc : character;
+entity tumblr : character;
+
+entity game : entity;
+
+//////////////////////////////////property
+
+
+//character
+property health(character : character) : number;
+property points(character : character) : number;
+property did_something(char: character) : number;
+
+
+//game
+property lighted_candle(char: character) : boolean;
+property lighted_first_candle(char: character) : boolean;
+property number_of_candles(entity:entity) : number;
+
+//emotions
+property happiness(character : character) : number;
+property altruism(character : character) : number;
+property ambition(character : character) : number;
+
+//emotions towards other characters
+property likes(character1: character, character2 : character) : number;
+property trusts(character1: character, character2 : character) : number;
+
+property agreed(character1: character, character2 : character) : boolean;
+
+//////////////////////////////////////init_properties
+
+health(agent) = 10;
+points(agent) = 3;
+happiness(agent) = 0;
+altruism(agent) = -17;
+ambition(agent) = 3;
+likes(agent, doctor) = 0;
+likes(agent, mc) = 0;
+likes(agent, science) = 0;
+likes(agent, actor) = 0;
+likes(agent, tumblr) = 0;
+trusts(agent, mc) = 0;
+trusts(agent, doctor) = 0;
+trusts(agent, science) = 0;
+trusts(agent, actor) = 0;
+trusts(agent, tumblr) = 0;
+
+
+health(doctor) = 10;
+points(doctor) = 3;
+happiness(doctor) = 0;
+altruism(doctor) = 17;
+ambition(doctor) = 10;
+likes(doctor, mc) = 0;
+likes(doctor, agent) = 0;
+likes(doctor, science) = 0;
+likes(doctor, actor) = 0;
+likes(doctor, tumblr) = 0;
+trusts(doctor, mc) = 0;
+trusts(doctor, agent) = 0;
+trusts(doctor, science) = 0;
+trusts(doctor, actor) = 0;
+trusts(doctor, tumblr) = 0;
+
+
+
+health(science) = 10;
+points(science) = 3;
+happiness(science) = 0;
+altruism(science) = 0;
+ambition(science) = -17;
+likes(science, mc) = 0;
+likes(science, agent) = 0;
+likes(science, doctor) = 0;
+likes(science, actor) = 0;
+likes(science, tumblr) = 0;
+trusts(science, mc) = 0;
+trusts(science, agent) = 0;
+trusts(science, doctor) = 0;
+trusts(science, actor) = 0;
+trusts(science, tumblr) = 0;
+
+
+
+health(actor) = 10;
+points(actor) = 5;
+happiness(actor) = 0;
+altruism(actor) = 15;
+ambition(actor) = 5;
+likes(actor, mc) = 0;
+likes(actor, agent) = 0;
+likes(actor, doctor) = 0;
+likes(actor, science) = 0;
+likes(actor, tumblr) = 0;
+trusts(actor, mc) = 7;
+trusts(actor, agent) = 7;
+trusts(actor, doctor) = 7;
+trusts(actor, science) = 7;
+trusts(actor, tumblr) = 7;
+
+
+
+health(tumblr) = 10;
+points(tumblr) = 3;
+happiness(tumblr) = 0;
+altruism(tumblr) = 0;
+ambition(tumblr) = 0;
+likes(tumblr, mc) = 0;
+likes(tumblr, agent) = 0;
+likes(tumblr, doctor) = 0;
+likes(tumblr, science) = 0;
+likes(tumblr, actor) = 0;
+trusts(tumblr, mc) = 0;
+trusts(tumblr, agent) = 0;
+trusts(tumblr, doctor) = 0;
+trusts(tumblr, science) = 0;
+trusts(tumblr, actor) = 0;
+
+
+
+//actions
+
+//podejscie - teraz, dla uproszczenia, jedna akcja na raz (chyba ze jedyne co trzeba cofać to growe punkty itp) na postać?
+//to co zmotywuje postacie jest effectach, to co chca zyskac lub czego sie boja
+//ograniczenia w precondition tylko gdy naprawde ktoś nie moze tego zrobić
+
+action agree(char : character,other : character) {
+	precondition:
+		char != other
+		& !agreed(char,other)
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1 
+		&agreed(char,other)
+
+		//////szczescie
+
+		&happiness(char) = happiness(char)
+							
+							+ (ambition(char)/3)
+							- (points(char)/3)
+							+ (trusts(char,other)/3)
+							
+							
+		
+
+        
+
+        
+
+		;
+		 
+	consenting: char;
+	
+};
+
+
+action light_first_candle(char : character) {
+	precondition:
+		number_of_candles(game) == 0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1 &
+		lighted_first_candle(char)
+		&lighted_candle(char)
+		& number_of_candles(game) =  number_of_candles(game) + 1
+
+		//////szczescie
+
+		//własne
+		
+		&happiness(char) = happiness(char)
+							+ (ambition(char)/4)
+							- (points(char)/3)
+							
+		
+
+        & points(char) =  points(char) + 1
+
+        
+
+		;
+		 
+	consenting: char;
+	
+};
+
+
+
+action light_another_candle(char : character, other : character ) {
+	precondition:
+        char != other 
+		& number_of_candles(game) > 0
+		& lighted_first_candle(other)
+		& ! lighted_candle(char)
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1 
+		& number_of_candles(game) =  number_of_candles(game) + 1
+		& lighted_candle(char)
+        & points(char) =  points(char) + 1
+		& points(other) =  points(other) + 1
+
+		&happiness(char) = happiness(char)
+							+ (altruism(char)/4)
+							+ (ambition(char)/4)
+							- (points(char)/5)
+							+ (likes(char,other)/4)
+							
+		;
+		 
+	consenting: char;
+	
+};
+
+
+action put_out_someones_candle(char : character, other : character ) {
+	precondition:
+        char != other 
+		& number_of_candles(game) > 0
+		& lighted_first_candle(other)
+		
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1 
+		
+        & points(char) =  points(char) + number_of_candles(game)
+		& points(other) =  points(other) - number_of_candles(game)
+
+		& number_of_candles(game) = 0
+		& !lighted_first_candle(other)
+		& forall(c : character) 
+			if(lighted_candle(c)) !lighted_candle(c)
+
+		&happiness(char) = happiness(char)
+							- (altruism(char)/4)
+							+ (ambition(char)/4)
+							- (points(char)/4)
+							- (likes(char,other)/4)
+							
+
+
+		;
+		 
+	consenting: char;
+	
+};
+
+
+action put_out_own_candle(char : character ) {
+	precondition:
+         number_of_candles(game) > 0
+		& lighted_first_candle(char)
+		
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1 
+		
+		& number_of_candles(game) = 0
+		& !lighted_first_candle(char)
+		& forall(c : character) 
+			if(lighted_candle(c)) !lighted_candle(c)
+
+
+		&happiness(char) = happiness(char)
+							- (ambition(char)/4)
+							+ (points(char)/3)
+							
+		
+		;
+		 
+	consenting: char;
+	
+};
+
+//poproś o zapalenie jako pierwszy
+
+
+
+//zmuś o zapalenie jako pierwszy
+
+//trigger
+
+utility(): ((sum(c : character) did_something(c)) > 3 ) 
+        //did_something(science) > 0
+		//&did_something(actor) > 0
+            ;
+
+//(if(0 < (sum(c : character) did_something(c)) < 3) 1 else 0) ;
+
+
+
+utility(doctor):
+	 ( happiness(doctor) );
+
+utility(agent):
+	 ( happiness(agent));
+
+utility(actor):
+	 (happiness(actor));
+
+utility(science):
+	 (happiness(science));

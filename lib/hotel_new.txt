@@ -1,0 +1,286 @@
+///////////////////////////////////entity
+
+
+entity actor : character;
+entity science : character;
+entity doctor : character;
+entity agent : character;
+entity mc : character;
+entity tumblr : character;
+
+entity game : entity;
+
+//////////////////////////////////property
+
+
+//character
+property health(character : character) : number;
+property points(character : character) : number;
+property did_something(char: character) : number;
+property imprisoned(char: character) : boolean;
+
+//game
+property lighted_candle(char: character) : boolean;
+property lighted_first_candle(char: character) : boolean;
+property number_of_candles(entity:entity) : number;
+
+//emotions
+property happiness(character : character) : number;
+property altruism(character : character) : number;
+property ambition(character : character) : number;
+
+//emotions towards other characters
+property likes(character1: character, character2 : character) : number;
+property trusts(character1: character, character2 : character) : number;health(agent) = 10 ; 
+points(agent) = 7 ; 
+happiness(agent) = 18 ;
+altruism(agent) = -33 ;
+ambition(agent) = 11 ;
+likes(agent, doctor) = 0 ;
+likes(agent, science) = 0 ;
+likes(agent, actor) = 0 ;
+trusts(agent, actor) = 0 ;
+trusts(agent, actor) = 0 ;
+trusts(agent, actor) = 0 ;
+health(doctor) = 10 ; 
+points(doctor) = 3 ; 
+happiness(doctor) = 0 ;
+altruism(doctor) = 17 ;
+ambition(doctor) = 10 ;
+likes(doctor, agent) = 0 ;
+likes(doctor, science) = 0 ;
+likes(doctor, actor) = 0 ;
+trusts(doctor, actor) = 0 ;
+trusts(doctor, actor) = 0 ;
+trusts(doctor, actor) = 0 ;
+health(science) = 10 ; 
+points(science) = 3 ; 
+happiness(science) = 0 ;
+altruism(science) = 0 ;
+ambition(science) = -17 ;
+likes(science, doctor) = 0 ;
+likes(science, agent) = 0 ;
+likes(science, actor) = 0 ;
+trusts(science, actor) = 0 ;
+trusts(science, actor) = 0 ;
+trusts(science, actor) = 0 ;
+health(actor) = 10 ; 
+points(actor) = 4 ; 
+happiness(actor) = 25 ;
+altruism(actor) = -11 ;
+ambition(actor) = 42 ;
+lighted_candle(actor) ;
+likes(actor, doctor) = 0 ;
+likes(actor, science) = 0 ;
+likes(actor, agent) = -20 ;
+trusts(actor, agent) = -20 ;
+trusts(actor, agent) = -20 ;
+trusts(actor, agent) = -20 ;
+number_of_candles(game)= 1 ; 
+lighted_first_candle(actor) ; 
+action light_first_candle(char : character) {
+	precondition:
+		number_of_candles(game) == 0
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1 &
+		lighted_first_candle(char)
+		& number_of_candles(game) =  number_of_candles(game) + 1
+
+        & points(char) =  points(char) + 1
+
+        & if(ambition(char) > 10) (
+                                    ambition(char) = ambition(char) + 2
+								    & happiness(char) = happiness(char) + 2)
+                                 
+								  
+        & if(ambition(char) < -10)   (ambition(char) = ambition(char) + 3
+								  & happiness(char) = happiness(char) - 3
+								  )
+
+		;
+		 
+	consenting: char;
+	
+};
+
+
+//char
+//altruizm - + szczeszcie jesli wysoko, minus jesli nisko
+//ambicja -,zwieksza sie + troche szczescie jesli wysoko
+//lubienie - jesli bardzo lubi to plus szczescie, minus jesli nie lubi
+//ufanie  -  brak
+
+//other
+//altruizm - lekki plus
+//ambicja - brak
+//lubienie - plus lubienie
+//ufanie  - plus ufanie
+
+action light_another_candle(char : character, other : character ) {
+	precondition:
+        char != other 
+		& number_of_candles(game) > 0
+		& lighted_first_candle(other)
+		& ! lighted_candle(char)
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1 
+		& number_of_candles(game) =  number_of_candles(game) + 1
+		& lighted_candle(char)
+        & points(char) =  points(char) + 1
+		& points(other) =  points(other) + 1
+
+		& ambition(char) = ambition(char) + 1
+		& altruism(char) = altruism(char) + 1
+
+        & if(altruism(char) >= 0) ( 
+                            
+								   happiness(char) = happiness(char) + 2
+                                 ) 
+								  
+        & if(altruism(char) < -10)   (happiness(char) = happiness(char) - 1
+								  )
+
+
+		 & if(likes(char,other) > 5) ( 
+								   happiness(char) = happiness(char) + 3
+                                 ) 
+								  
+        & if(likes(char,other) < -5)   (happiness(char) = happiness(char) - 2
+								  )
+		
+		&likes(other,char) =  likes(other,char) + 2
+		& trusts(other,char) = trusts(other,char)  + 2
+		& altruism(other) = altruism(other)  + 1
+		;
+		 
+	consenting: char;
+	
+};
+
+//char
+//altruizm - zmmniejsza sie, szczeszcie jesli wysoko, plus jesli nisko
+//ambicja zwieksza sie + troche szczescie jesli wysoko, traci szczescie jesli nisko
+//lubienie - jesli bardzo lubi to minus szczescie, plus jesli nie lubi
+//ufanie  -  brak
+
+//other
+//altruizm - lekki minus
+//ambicja - brak
+//lubienie - minus lubienie
+//ufanie  - minus ufanie
+
+action put_out_candle(char : character, other : character ) {
+	precondition:
+        char != other 
+		& number_of_candles(game) > 0
+		& lighted_first_candle(other)
+		
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1 
+		
+        & points(char) =  points(char) + number_of_candles(game)
+		& points(other) =  points(other) - number_of_candles(game)
+
+		& ambition(char) = ambition(char) + 2
+		& altruism(char) = altruism(char) - 4
+
+        & if(altruism(char) > 10) ( 
+                            
+								   happiness(char) = happiness(char) - 5
+                                 ) 
+								  
+        & if(altruism(char) < -10)   (happiness(char) = happiness(char) + 4
+								  )
+
+		& if(ambition(char) > 10) ( 
+                            
+								   happiness(char) = happiness(char) + 2
+                                 ) 
+		& if(ambition(char) < -10) ( 
+                            
+								   happiness(char) = happiness(char) - 4
+                                 ) 
+
+		 & if(likes(char,other) > 10) ( 
+								   happiness(char) = happiness(char) - 4
+                                 ) 
+								  
+        & if(likes(char,other) < -10)   (happiness(char) = happiness(char) + 3
+								  )
+		
+		&likes(other,char) =  likes(other,char) - 5
+		& trusts(other,char) = trusts(other,char)  - 5
+		& altruism(other) = altruism(other)  - 2
+
+
+		& number_of_candles(game) = 0
+		& !lighted_first_candle(other)
+		& forall(c : character) 
+			if(lighted_candle(c)) !lighted_candle(c)
+		;
+		 
+	consenting: char;
+	
+};
+
+
+action put_out_first_candle(char : character ) {
+	precondition:
+         number_of_candles(game) > 0
+		& lighted_first_candle(char)
+		
+		;
+
+	effect:
+		did_something(char) = did_something(char) + 1 
+		
+
+		& if(ambition(char) > 10) ( 
+                            
+								   happiness(char) = happiness(char) - 3
+                                 ) 
+		& if(ambition(char) < -10) ( 
+                            
+								   happiness(char) = happiness(char)  + 3
+                                 ) 
+
+		
+
+
+		& number_of_candles(game) = 0
+		& !lighted_first_candle(char)
+		& forall(c : character) 
+			if(lighted_candle(c)) !lighted_candle(c)
+		;
+		 
+	consenting: char;
+	
+};
+
+
+utility(): ((sum(c : character) did_something(c)) == 1 ) 
+        //&did_something(science) > 0
+		//&did_something(actor) > 0
+            ;
+
+//(if(0 < (sum(c : character) did_something(c)) < 3) 1 else 0) ;
+
+
+
+utility(doctor):
+	 (points(doctor)  + happiness(doctor) );
+
+utility(agent):
+	 (points(agent)   + happiness(agent));
+
+utility(actor):
+	 (points(actor)  + happiness(actor));
+
+utility(science):
+	 (points(science)  + happiness(science));

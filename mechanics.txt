@@ -1,0 +1,60 @@
+atrybuty teraz:
+-zdrowie
+-punkty
+-posiadanie
+-altruizm
+-ambicje
+-lubienie
+-ufanie
+
+akcje teraz:
+
+
+
+do zrobienia:
+-dodaj do końca basic akcje
+-jeszcze raz je przemysl
+-przenies do logiki gry:
+	-akcje
+	-odczytywanie akcji
+	-zmiana stanu swiata
+	-tworzenie nowego pliku
+-przetestowanie
+-przemyślenie rodzaji celów
+-dodanie tablicy celów
+
+-interakcja z graczem
+
+-dodanie rotacji postaci
+-dodanie reakcji
+
+-dodanie więcej akcji - atrybutów:
+	-jedznie - zdobywanie
+	-zdrowie psychiczne
+	-walka?
+	-wiedza?
+	-zwiazane z konkretnymi stworami? tez moga miec atrybuty
+	-lokacje?
+	-zbrodnie?
+	-gry?
+	-prośby,rozkazy?
+	-przeklniecie, przewidywanie przyszlosci, 
+
+-gui
+-nn
+
+
+
+TEMPLATKA
+
+
+//////szczescie
+
+		&happiness(char) = happiness(char)
+							+ (altruism(char))
+							+ (ambition(char))
+							+ (points(char))
+							+ (likes(char,other))
+							+ (trusts(char,other))
+							+ (altruism(other))
+							+ (ambition(other))

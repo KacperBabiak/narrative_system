@@ -31,6 +31,11 @@ entity diamond : valuable;
 entity first_aid : healing;
 entity gun : weapon;
 
+entity bar : place;
+entity kitchen : place;
+entity casino : place;
+entity saferoom : place;
+
 //////////////////////////////////property
 
 
@@ -41,18 +46,27 @@ property wants(object : character, item : item) : boolean;
 property dangerous(character : location) : boolean;
 property allied(character1: character, character2 : character) : boolean;
 property did_something(char: character) : number;
+property imprisoned(char: character) : boolean;
 property wants_revenge_on(character1: character, character2 : character) : boolean;
 
-//property previous_at(object : location) : location;
-//property controllable(character : character) : boolean;
-//property has_money(character : character) : number;
+//place
+property connected_to(place : place, place2 : place) : boolean;
+
+
 //emotions
 property likes(character1: character, character2 : character) : number;
 property trusts(character1: character, character2 : character) : number;
 property fears(character1: character, character2 : character) : number;
 
 //////////////////////////////////////init_properties
-
+connected_to(casino,saferoom) ;
+connected_to(saferoom,casino) ;
+connected_to(casino,kitchen);
+connected_to(kitchen,casino);
+connected_to(casino,bar);
+connected_to(bar,casino);
+connected_to(kitchen,bar) ;
+connected_to(bar,kitchen) ;
 
 at(alcohol) = soldier;
 at(gold) = mc;
@@ -77,6 +91,7 @@ fears(thief, doctor) = 5;
 fears(thief, soldier) = 20;
 fears(thief, actor) = 5;
 fears(thief, tumblr) = 0;
+at(thief) = casino;
 
 health(doctor) = 100;
 likes(doctor, mc) = 35;
@@ -95,6 +110,8 @@ fears(doctor, soldier) = 10;
 fears(doctor, actor) = 5;
 fears(doctor, tumblr) = 5;
 wants(doctor,alcohol);
+at(doctor) = casino;
+
 
 health(soldier) = 100;
 dangerous(soldier);
@@ -113,6 +130,8 @@ fears(soldier, thief) = 0;
 fears(soldier, doctor) = 0;
 fears(soldier, actor) = 0;
 fears(soldier, tumblr) = 25;
+at(soldier) = casino;
+
 
 health(actor) = 100;
 likes(actor, mc) = 10;
@@ -130,6 +149,8 @@ fears(actor, thief) = 15;
 fears(actor, doctor) = 5;
 fears(actor, soldier) = 25;
 fears(actor, tumblr) = 5;
+at(actor) = casino;
+
 
 health(tumblr) = 100;
 likes(tumblr, mc) = 50;
@@ -147,19 +168,36 @@ fears(tumblr, thief) = 0;
 fears(tumblr, doctor) = 0;
 fears(tumblr, soldier) = 0;
 fears(tumblr, actor) = 0;
+at(tumblr) = casino;
+
 
 ////////////////////////////////////////actions
+action travel(character : character, from : place, to : place) {
+	precondition:
+		from != to &
+		health(character) > 0  &
+		at(character) == from &
+		!imprisoned(character) &
+        connected_to(from,to);
+	effect:
+		did_something(character) = did_something(character) + 1 &
+		at(character) = to;
+	consenting: character;
+};
 
 
-
-action take(taker : character,item : item,  giver : character) {
+action take(taker : character,item : item,  giver : character, place : place) {
 	precondition:
 		giver != taker &
+		at(taker) == place &
+		at(giver) == place &
         health(taker) != 0 &
         at(item) == giver &
-		fears(taker,giver) < 30;
+		fears(taker,giver) < 30 &
+		!imprisoned(taker);
 	effect:
 		did_something(taker) = did_something(taker) + 1 &
+		did_something(giver) = did_something(giver) + 1 &
 		if(dangerous(taker)) (health(giver) = health(giver) - 40) 
 		else (health(giver) = health(giver) - 15) &
 		if(dangerous(giver)) (health(taker) = health(taker) - 40) &
@@ -176,15 +214,18 @@ action take(taker : character,item : item,  giver : character) {
 };
 
 
-action give(giver : character, item: item, taker : character) {
+action give(giver : character, item: item, taker : character, place : place) {
 	precondition:
 		giver != taker &
 		health(giver) != 0  &
         health(taker) != 0 &
-        at(item) == giver ;
+		at(taker) == place &
+		at(giver) == place &
+        at(item) == giver  &
+		!imprisoned(giver);
 	effect:
 		did_something(giver) =  did_something(giver) + 1 &
-		//did_something(taker) =  did_something(taker) + 1 &
+		did_something(taker) =  did_something(taker) + 1 &
 		at(item) = taker &
 		if(wants(taker,item)) 
 		(trusts(taker,giver) = trusts(taker,giver) + 10 &
@@ -198,15 +239,21 @@ action give(giver : character, item: item, taker : character) {
 	observing(c : character) : health(c) != 0 ;
 };
 
-
-action exchange(giver : character, item1: item, item2 : item, taker : character) {
+/*
+action exchange(giver : character, item1: item, item2 : item, taker : character, place : place) {
 	precondition:
 		item1 != item2 &
 		giver != taker &
 		health(giver) != 0  &
         health(taker) != 0 &
+		at(taker) == place &
+		at(giver) == place &
         at(item1) == giver &
-        at(item2) == taker ;
+        at(item2) == taker
+		 &
+		!imprisoned(giver)
+		 &
+		!imprisoned(taker) ;
 	effect:
 		
 		did_something(giver) =  did_something(giver) + 1 &
@@ -224,21 +271,25 @@ action exchange(giver : character, item1: item, item2 : item, taker : character)
 	observing(c : character) : health(c) != 0 ;
 };
 
+*/
 
-
-action ally(taker : character, giver : character) {
+action ally(taker : character, giver : character, place : place) {
 	precondition:
 		giver != taker &
 		health(giver) != 0  &
         health(taker) != 0 &
+		at(taker) == place &
+		at(giver) == place &
 		trusts(giver,taker) > 18 &
         !(allied(taker,giver))&
 		fears(taker,giver)<20 &
 		!wants_revenge_on(taker,giver)&
-		!wants_revenge_on(giver,taker);
+		!wants_revenge_on(giver,taker) &
+		!imprisoned(taker);
 
 	effect:
 		did_something(taker) = did_something(taker) + 1 &
+		did_something(giver) = did_something(giver) + 1 &
 		if(dangerous(taker)) dangerous(giver) &
 		if(dangerous(giver)) dangerous(taker) &
 		trusts(giver,taker) = trusts(giver,taker)+20 &
@@ -253,18 +304,23 @@ action ally(taker : character, giver : character) {
 };
 
 
-action gossip(starter : character, hearing : character, about : character) {
+action gossip(starter : character, hearing : character, about : character, place : place) {
 	precondition:
 		starter != hearing &
 		starter != about &
+		at(starter) == place &
+		at(hearing) == place &
 		about != hearing &
 		health(hearing) != 0  &
         health(starter) != 0 &
-		trusts(hearing,starter) > 25 
+		trusts(hearing,starter) > 25  &
+		!imprisoned(starter)  &
+		!imprisoned(hearing)
         ;
 
 	effect:
 		did_something(starter) = did_something(starter) + 1 &
+		did_something(hearing) = did_something(hearing) + 1 &
 		trusts(hearing,about) = trusts(hearing,about) - 20 &
 		likes(hearing,about) = likes(hearing,about) - 20 
 		;
@@ -276,7 +332,8 @@ action gossip(starter : character, hearing : character, about : character) {
 
 action rest(char : character) {
 	precondition:
-		health(char) < 100;
+		health(char) > 0 
+		;
 
 	effect:
 		did_something(char) = did_something(char) + 1 &
@@ -286,13 +343,16 @@ action rest(char : character) {
 	
 };
 
-action heal(char : character, other : character, heal : healing) {
+action heal(char : character, other : character, heal : healing, place : place) {
 	precondition:
-		health(other) < 100 &
+		health(char) > 0 &
+		at(char) == place &
+		at(other) == place &
 		at(heal) == char;
 
 	effect:
 		did_something(char) = did_something(char) + 1 &
+		did_something(other) = did_something(other) + 1 &
 		health(other) = health(other) + 40 &
 		at(heal) = ? &
 		fears(char,other) = fears(char,other) - 20 ;
@@ -301,13 +361,17 @@ action heal(char : character, other : character, heal : healing) {
 	
 };
 
-action intimidate(char : character, other : character) {
+action intimidate(char : character, other : character, place : place) {
 	precondition:
 		char != other &
 		health(char) != 0  &
-        health(other) != 0;
+        health(other) != 0  &
+		at(char) == place &
+		at(other) == place &
+		!imprisoned(char);
 	effect:
 		did_something(char) = did_something(char) + 1 &
+		did_something(other) = did_something(other) + 1 &
 		wants_revenge_on(other, char) &
 		if(dangerous(char)) 
 			(fears(other,char) = fears(other,char) + 20)
@@ -315,19 +379,61 @@ action intimidate(char : character, other : character) {
 	consenting: char;
 };
 
+action imprison(char : character, other : character, place : place) {
+	precondition:
+		char != other &
+		health(char) != 0  &
+        health(other) != 0 &
+		at(char) == place &
+		at(other) == place &
+		!imprisoned(other) &
+		!imprisoned(char)
+		;
+	effect:
+		did_something(char) = did_something(char) + 1 &
+		did_something(other) = did_something(other) + 1 &
+		wants_revenge_on(other, char) &
+		imprisoned(other) &
+		likes(other,char) = likes(other,char) - 30 &
+		if(dangerous(char)) 
+			(fears(other,char) = fears(other,char) + 20)
+		else (fears(other,char) = fears(other,char) + 10);
+	consenting: char;
+};
 
-action take_revenge(char : character, other : character){
+action release(char : character, other : character, place : place) {
+	precondition:
+		char != other &
+		health(char) != 0  &
+        health(other) != 0 &
+		at(char) == place &
+		at(other) == place &
+		imprisoned(other) &
+		!imprisoned(char)
+		;
+	effect:
+		did_something(char) = did_something(char) + 1 &
+		did_something(other) = did_something(other) + 1 &
+		!imprisoned(other) &
+		likes(other,char) = likes(other,char) + 30 ;
+	consenting: char;
+};
+
+action take_revenge(char : character, other : character, place : place){
 	precondition:
 		health(char) > 0 &
 		health(other) > 0 &
+		at(char) == place &
+		at(other) == place &
 		char != other &
 		wants_revenge_on(char,other) &
 		fears(char,other) < 20 &
-		likes(char,other) < 30;
+		likes(char,other) < 30  &
+		!imprisoned(char);
 		
 	effect:
 		did_something(char) = did_something(char) + 1 &
-
+		did_something(other) = did_something(other) + 1 &
 		if(dangerous(other)) 
 			(health(char) = health(char) - 20) 
 		else 
@@ -347,6 +453,8 @@ action take_revenge(char : character, other : character){
 	consenting: char;
 };
 
+//akcje bez consenting - siły natury
+//postacie muszą bardzo chcieć się wymienic
 //postacie musza chciec sie zemscic
 //wartośc przedmiotw
 //zwiekszenie wartości pomiędzy rundami, nie tylko utrzymanie
@@ -357,6 +465,10 @@ action take_revenge(char : character, other : character){
 //ogólne emocje
 //zlość na kogoś
 //nazywanie relacji - to już w grze?
+//ucieczka
+//pomoc
+//nagłe decyzje - nie planowane, dzieja się podczas innych akcji
+
 
 
 //////////////////////////triggers
@@ -388,9 +500,9 @@ trigger is_dangerous(char : character, w : weapon){
 
 //////////////////utility
 
-utility(): (did_something(doctor) + did_something(thief) + did_something(actor) + did_something(soldier) + did_something(tumblr) > 4 );
+utility(): (did_something(doctor) + did_something(thief)  + did_something(actor)  + did_something(soldier) + did_something(tumblr)  > 2 );
 	//(did_something(doctor) == 1 & did_something(thief) == 1 & did_something(actor) == 1 & did_something(soldier) == 1 )  ;
-
+	
 
 
 utility(doctor):
