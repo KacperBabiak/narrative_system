@@ -1,4 +1,226 @@
-///////////////////////////////////entity
+from subprocess import Popen, PIPE, STDOUT
+import game_files.GameLogic as logic
+import game_files.character as chr
+from game_files.item import Item
+import random
+
+class Game:
+
+
+	def __init__(self) -> None:
+		self.init_state()
+		#self.game_loop()
+
+	#wprowadza stan swiata pierwszy
+	def init_state(self):
+		characters = {}
+		items = {}
+		self.gl = logic.GameLogic(characters,items)
+
+		food = Item("food")
+		money = Item("money")
+		book = Item("book")
+
+		items["food"] = food
+		items["money"] = money
+		items["book"] = book
+
+		mc = chr.Character(self.gl, "mc", 0, 0 )
+		characters["mc"]=mc
+		
+
+		agent = chr.Character(self.gl, "agent", -17, 3 )
+		characters["agent"]=agent
+		agent.add_item(book)
+
+		doctor = chr.Character(self.gl, "doctor", 17, 15 )
+		doctor.add_item(food)
+		characters["doctor"]=doctor
+		
+
+		science = chr.Character(self.gl, "science", 8, -17 )
+		characters["science"]=science
+		science.add_item(food)
+
+		actor = chr.Character(self.gl, "actor", -3, 17 )
+		actor.add_item(money)
+		actor.add_item(money)
+		characters["actor"]=actor
+
+		tumblr = chr.Character(self.gl, "tumblr", 0, 0 )
+		characters["tumblr"]=tumblr
+		tumblr.add_item(money)
+
+		mc.add_char(doctor,0,0)
+		mc.add_char(science,0,0)
+		mc.add_char(agent,0,0)
+		mc.add_char(actor,0,0)
+		mc.add_char(tumblr,0,0)
+
+		agent.add_char(doctor,15,0)
+		agent.add_char(science,0,0)
+		agent.add_char(actor,0,0)
+		agent.add_char(tumblr,0,0)
+		agent.add_char(mc,0,0)
+		
+		doctor.add_char(agent,0,0)
+		doctor.add_char(science,0,0)
+		doctor.add_char(actor,0,0)
+		doctor.add_char(tumblr,0,0)
+		doctor.add_char(mc,0,0)
+
+		science.add_char(doctor,0,0)
+		science.add_char(agent,0,0)
+		science.add_char(actor,0,0) 
+		science.add_char(tumblr,0,0)
+		science.add_char(mc,0,0)
+
+		actor.add_char(doctor,0,0)
+		actor.add_char(science,0,0)
+		actor.add_char(agent,0,0)
+		actor.add_char(tumblr,0,0)
+		actor.add_char(mc,0,0)
+
+
+		tumblr.add_char(doctor,0,0)
+		tumblr.add_char(science,0,0)
+		tumblr.add_char(agent,0,0)
+		tumblr.add_char(actor,0,0)
+		tumblr.add_char(mc,0,0)
+
+		self.gl.characters = characters
+		self.gl.items = items
+
+		#nadaj odgórnie
+		doctor.add_goals()
+		science.add_goals()
+		agent.add_goals()
+		actor.add_goals()
+		tumblr.add_goals()
+
+		self.current_character = tumblr
+		self.print_state()
+
+		
+
+	def print_state(self):
+		text= ""
+		for char in self.gl.characters.values():
+			text = text + char.name + "\n" +  " health: " + str(char.health) + "\n" + " happiness: " + str(char.happiness) + "\n"+  " altruism: " + str(char.altruism)+ "\n" + " ambition: " + str(char.ambition) + "\n"
+			text = text + "\n".join([(item.name + str(char.items[item])) for item in char.items])  + "\n "
+			text = text + "\n".join(char.goals)  + "\n \n"
+		
+		#print(text)
+		
+		return text
+			
+
+		
+
+	#odpala plan i przejmuje akcje
+	def load_action(self,file):
+
+		
+		p = Popen(['java', '-jar', 'lib\sabre.jar', '-p', file,'-el',"0",'-g',"3","-tl","500"], stdout=PIPE, stderr=STDOUT)
+		
+		for line in p.stdout:
+			return (str(line, encoding='utf-8'))
+
+	#wykonuje akcje 
+	def do_action(self,args):
+		
+		print(args)
+		match args[0]:
+			case "give":
+				print("give")
+				self.gl.characters[args[1]].give(self.gl.characters[args[2]],self.gl.items[args[3]])
+			case "take":
+				print("take")
+				self.gl.characters[args[1]].take(self.gl.characters[args[2]],self.gl.items[args[3]])
+			case "exchange":
+				print("exchange")
+				self.gl.characters[args[1]].exchange(self.gl.characters[args[2]],self.gl.items[args[3]],self.gl.items[args[4]])
+			case "talk_altruism":
+				print("talk_altruism")
+				self.gl.characters[args[1]].talk_altruism(self.gl.characters[args[2]])
+			case "talk_ambition":
+				print("talk_ambition")
+				self.gl.characters[args[1]].talk_ambition(self.gl.characters[args[2]])
+			case "compliment":
+				print("compliment")
+				self.gl.characters[args[1]].compliment(self.gl.characters[args[2]])
+			case "intimidate":
+				print("intimidate")
+				self.gl.characters[args[1]].intimidate(self.gl.characters[args[2]])
+			case "gossip_about":
+				print("gossip_about")
+				self.gl.characters[args[1]].gossip_about(self.gl.characters[args[2]],self.gl.characters[args[3]])
+			case "praise_someone":
+				print("praise_someone")
+				self.gl.characters[args[1]].praise_someone(self.gl.characters[args[2]],self.gl.characters[args[3]])
+			case "attack":
+				print("attack")
+				self.gl.characters[args[1]].attack(self.gl.characters[args[2]])
+			case "rest":
+				print("rest")
+				self.gl.characters[args[1]].rest()
+			case "take_care_of":
+				print("take_care_of")
+				self.gl.characters[args[1]].take_care_of(self.gl.characters[args[2]])
+			case "work":
+				print("work")
+				self.gl.characters[args[1]].work()
+			case "eat":
+				print("eat")
+				self.gl.characters[args[1]].eat()
+			case "read":
+				print("read")
+				self.gl.characters[args[1]].read()
+			case "spend_time_together":
+				print("spend_time_together")
+				self.gl.characters[args[1]].spend_time_together(self.gl.characters[args[2]])
+		
+		
+	#aktualizuje stan swiata
+	def change_state(self):
+		
+		
+		action = self.load_action('lib\hotel_new.txt')
+		
+		print(action)
+		
+		args = action.replace("("," ").replace(")","").replace("\r\n","").replace(",","").split(' ')
+		self.do_action(args)
+		print(args)
+		return(action)
+		
+	def character_rotation(self):
+		characters = list(self.gl.characters.values())
+		index = characters.index(self.current_character)
+		if index == len(characters) - 1:
+			self.current_character = characters[1]
+		else:
+			self.current_character = characters[index+1]
+		
+	def check_all_goals(self):
+		for char in self.gl.characters.values():
+				char.check_goals()
+
+	def game_loop(self):
+		#jeszcze sprawdzenie wszystkich goali
+		while True:
+			self.check_all_goals()
+			self.character_rotation()
+			self.create_file()
+			self.change_state()
+			self.print_state()
+			break
+			
+
+	#tworzy nowy plik
+	def create_file(self):
+		with open("lib/hotel_new.txt", 'w') as f:
+			f.write("""///////////////////////////////////entity
 				type object;
 				type character : object;
 				type item : object;
@@ -26,106 +248,33 @@
 
 				//emotions towards other characters
 				property likes(character1: character, character2 : character) : number;
-				property trusts(character1: character, character2 : character) : number;entity food: item;  
-entity money: item;  
-entity book: item;  
-health(mc) = 15 ; 
-points(mc) = 0 ; 
-happiness(mc) = 10.429 ;
-altruism(mc) = 4 ;
-ambition(mc) = 0 ;
-likes(mc, doctor) = 2 ;
-likes(mc, science) = 0 ;
-likes(mc, agent) = 0 ;
-likes(mc, actor) = 0 ;
-likes(mc, tumblr) = 0 ;
-trusts(mc, doctor) = 2 ;
-trusts(mc, science) = 0 ;
-trusts(mc, agent) = 0 ;
-trusts(mc, actor) = 0 ;
-trusts(mc, tumblr) = 0 ;
-health(agent) = 15 ; 
-points(agent) = 0 ; 
-happiness(agent) = 12.429 ;
-altruism(agent) = -19 ;
-ambition(agent) = 3 ;
-likes(agent, doctor) = 15 ;
-likes(agent, science) = 0 ;
-likes(agent, actor) = 0 ;
-likes(agent, tumblr) = 0 ;
-likes(agent, mc) = 0 ;
-trusts(agent, doctor) = 0 ;
-trusts(agent, science) = 0 ;
-trusts(agent, actor) = -1 ;
-trusts(agent, tumblr) = 0 ;
-trusts(agent, mc) = 0 ;
-has(agent, book) = 0 ;
-health(doctor) = 12 ; 
-points(doctor) = 0 ; 
-happiness(doctor) = 17.715 ;
-altruism(doctor) = 21 ;
-ambition(doctor) = 16 ;
-likes(doctor, agent) = 0 ;
-likes(doctor, science) = 0 ;
-likes(doctor, actor) = 0 ;
-likes(doctor, tumblr) = 0 ;
-likes(doctor, mc) = 6 ;
-trusts(doctor, agent) = 0 ;
-trusts(doctor, science) = 0 ;
-trusts(doctor, actor) = 0 ;
-trusts(doctor, tumblr) = 0 ;
-trusts(doctor, mc) = 2 ;
-has(doctor, food) = 0 ;
-has(doctor, money) = 0 ;
-health(science) = 15 ; 
-points(science) = 0 ; 
-happiness(science) = 11.143 ;
-altruism(science) = 10 ;
-ambition(science) = -17 ;
-likes(science, doctor) = 0 ;
-likes(science, agent) = 0 ;
-likes(science, actor) = 1 ;
-likes(science, tumblr) = 0 ;
-likes(science, mc) = 0 ;
-trusts(science, doctor) = 0 ;
-trusts(science, agent) = 0 ;
-trusts(science, actor) = 1 ;
-trusts(science, tumblr) = 0 ;
-trusts(science, mc) = 0 ;
-has(science, food) = 0 ;
-health(actor) = 15 ; 
-points(actor) = 0 ; 
-happiness(actor) = 9.572000000000001 ;
-altruism(actor) = -4 ;
-ambition(actor) = 14 ;
-likes(actor, doctor) = 0 ;
-likes(actor, science) = 3 ;
-likes(actor, agent) = -4 ;
-likes(actor, tumblr) = 0 ;
-likes(actor, mc) = 0 ;
-trusts(actor, doctor) = 0 ;
-trusts(actor, science) = 1 ;
-trusts(actor, agent) = -1 ;
-trusts(actor, tumblr) = 0 ;
-trusts(actor, mc) = 0 ;
-has(actor, money) = 1 ;
-health(tumblr) = 15 ; 
-points(tumblr) = 0 ; 
-happiness(tumblr) = 10 ;
-altruism(tumblr) = 0 ;
-ambition(tumblr) = 0 ;
-likes(tumblr, doctor) = 0 ;
-likes(tumblr, science) = 0 ;
-likes(tumblr, agent) = 0 ;
-likes(tumblr, actor) = 0 ;
-likes(tumblr, mc) = 0 ;
-trusts(tumblr, doctor) = 0 ;
-trusts(tumblr, science) = 0 ;
-trusts(tumblr, agent) = 0 ;
-trusts(tumblr, actor) = 0 ;
-trusts(tumblr, mc) = 0 ;
-has(tumblr, money) = 0 ;
-////////////////////////////////////////actions
+				property trusts(character1: character, character2 : character) : number;"""
+			)
+			for item in self.gl.items.keys():
+				f.write("entity "+ item  + ": item;  \n")
+				
+				#warrtosci postaci
+			for char in self.gl.characters.values():
+				f.write("health("+ char.name  +") = " + str(char.health) + " ; \n")
+				f.write("points(" + char.name  +") = " + str(char.points) + " ; \n")
+				f.write("happiness(" + char.name  +") = " + str(char.happiness) + " ;\n")
+				f.write("altruism(" + char.name  +") = " + str(char.altruism) + " ;\n")
+				f.write("ambition(" + char.name  +") = " + str(char.ambition) + " ;\n")
+
+			
+
+				for k,v in char.likes.items():
+						f.write("likes("+ char.name + ", " + k.name + ") = "+str(v) + " ;\n")
+
+				for k,v in char.trusts.items():
+						f.write("trusts("+ char.name + ", " + k.name + ") = "+str(v) + " ;\n")
+
+				for k,v in char.items.items():
+						f.write("has("+ char.name + ", " + k.name + ") = "+str(v) + " ;\n")
+
+				
+
+			f.write("""////////////////////////////////////////actions
 
 	//items
 
@@ -533,19 +682,30 @@ has(tumblr, money) = 0 ;
 	//////////////////utility
 
 	
-			utility(): 
- if (did_something(actor) ==1) 
-(if(happiness(actor)> 9.572000000000001) 1 else 0 ) + (if(has(actor,money)> 1) 1 else 0 ) + (if(altruism(actor) > -3) 1 else 0 )
-else 0; 
- utility(mc): 
- (if (happiness(mc)> 10.429) 1 else 0 );
-utility(agent): 
- (if (happiness(agent)> 12.429) 1 else 0 ) + (if (happiness(doctor)< 17.715) 1 else 0 ) + (if (happiness(science)< 11.143) 1 else 0 ) + (if (happiness(actor)< 9.572000000000001) 1 else 0 ) + (if (happiness(tumblr)< 10) 1 else 0 ) + (if (happiness(mc)< 10.429) 1 else 0 ) + (if (ambition(agent) > 3) 1 else 0 );
-utility(doctor): 
- (if (happiness(doctor)> 17.715) 1 else 0 ) + (if (has(doctor,money)> 0) 1 else 0 ) + (if (has(doctor,money)>0) 1 else 0 );
-utility(science): 
- (if (happiness(science)> 11.143) 1 else 0 ) + (if (ambition(science) > -17) 1 else 0 );
-utility(actor): 
- (if (happiness(actor)> 9.572000000000001) 1 else 0 ) + (if (has(actor,money)> 1) 1 else 0 ) + (if (altruism(actor) > -3) 1 else 0 );
-utility(tumblr): 
- (if (happiness(tumblr)> 10) 1 else 0 ) + (if (has(tumblr,food)>0) 1 else 0 );
+			""")
+
+			f.write("utility(): \n ".format(char.name))
+			f.write("if (did_something({}) ==1) \n".format(self.current_character.name))
+
+			for count, goal in enumerate(self.current_character.goals):
+					f.write("(if{} 1 else 0 )".format(goal))
+					if count == len(self.current_character.goals)-1:
+						f.write( "\n")
+					else: f.write(" + ")
+
+			f.write("else 0; \n ")
+		
+
+
+			for char in self.gl.characters.values():
+				f.write("utility({}): \n ".format(char.name))
+				for count, goal in enumerate(char.goals):
+					f.write("(if {} 1 else 0 )".format(goal))
+					if count == len(char.goals)-1:
+						f.write( ";\n")
+					else: f.write(" + ")
+			
+			
+			f.close()
+
+gm = Game()

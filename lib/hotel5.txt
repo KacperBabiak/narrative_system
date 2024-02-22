@@ -79,14 +79,14 @@ action give(char : character, other: character, item : item) {
 		&has(char, item) = has(char, item) - 1
 		&has(other, item) = has(other, item) + 1
 		
-		&happiness(char) =(happiness(char) + likes(char,other))
-		&altruism(char) = (altruism(char)+  1)
-		&likes(char,other) =(likes(char,other) +  1)
+		&happiness(char) =happiness(char) + (likes(char,other)/6)
+		&altruism(char) = (altruism(char) +  2 )
+		&likes(char,other) =(likes(char,other) +  1 )
 		
-		&happiness(other) =happiness(other) + 3
-		&altruism(other) = altruism(other)+  3
+		&happiness(other) = happiness(other) + 3
+		&altruism(other) = altruism(other) +  3
 
-		&likes(other,char) =likes(other,char) +  2
+		&likes(other,char) = likes(other,char) +  2
 		&trusts(other,char) = trusts(other,char) + 2
 		
 		;
@@ -277,7 +277,7 @@ action intimidate(char : character, other: character) {
 		did_something(char) = did_something(char) + 1
 		
 		&happiness(char) =happiness(char) -  (altruism(char)/7) - (likes(char,other)/7)
-		&altruism(char) = altruism(char)+  2
+		&altruism(char) = altruism(char) - 2
 		&trusts(char,other) = trusts(char,other) - 1
 
 
@@ -369,7 +369,7 @@ action attack(char : character, other: character) {
 	effect:
 		did_something(char) = did_something(char) + 1
 		
-		&happiness(char) = happiness(char) - (altruism(char)/5) - (likes(char,other)/5)
+		&happiness(char) = happiness(char) - 5 - (altruism(char)/5) - (likes(char,other)/5)
 		&altruism(char) = altruism(char) -  4
 		&ambition(char) = ambition(char) + 3
 		&trusts(char,other) = trusts(char,other) - 2
@@ -400,7 +400,7 @@ action rest(char : character) {
 		did_something(char) = did_something(char) + 1
 		
 		&health(char) = health(char) + 5
-		&happiness(char) =altruism(char) + 4
+		&happiness(char) =happiness(char) + 4
 		
 
 
@@ -430,7 +430,7 @@ action take_care_of(char : character, other: character) {
 
 
 		&health(other) = health(other) + 10
-		&happiness(other) =altruism(other) + 5
+		&happiness(other) =happiness(other) + 5
 		&altruism(other) = altruism(other)+  4
 		&likes(other,char) =likes(other,char) +  5
 		&trusts(other,char) = trusts(other,char) + 2
@@ -735,16 +735,25 @@ action open(char : character, other: character) {
 //////////////////utility
 
 utility():
-	//happiness(actor);
-	(sum(c:character) (did_something(c))) ;
 
+	(sum(c:character) (did_something(c))==1)  ;
+
+
+utility(agent ): 
+happiness(agent )>0;
+
+
+utility(doctor): 
+happiness(doctor)>0;
+
+utility(science): 
+happiness(science)>0;
 
 utility(actor): 
 happiness(actor)>0;
 
-
-utility(agent): 
-(if(has(agent,it) > 0) 5 else 0) + (2* likes(actor,agent));
+utility(tumblr): 
+happiness(tumblr)>0;
 
 
 
