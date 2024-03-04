@@ -78,10 +78,10 @@ class Character:
                     goals.append("(happiness({})< {})".format(char.name,char.happiness)) 
             
         
-        print(goals)
+        #print(goals)
         self.goals = goals
         self.goals.extend(self.start_goals)
-        print(self.goals)
+        #print(self.goals)
 
     def add_goals(self):
         

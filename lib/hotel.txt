@@ -49,7 +49,7 @@ property controllable(character : character) : boolean;
 //property paired(character : character, character2 : character) : boolean;
 property killed_by(character : character) : character;
 property crime_seen(character : character) : boolean;
-
+property did_something(char: character) : number;
 
 //place
 property fun_place(place : place) : boolean;
@@ -88,7 +88,7 @@ at(valuable) = safe;
 alive(thief);
 at(thief) = casino;
 at(safe_key) = thief;
-at(saferoom_key) = thief;
+
 has_money(thief) = 0;
 controllable(thief);
 
@@ -97,6 +97,8 @@ alive(doctor);
 at(doctor) = kitchen;
 has_money(doctor) = 0;
 controllable(doctor);
+at(saferoom_key) = thief;
+
 
 alive(alko);
 at(alko) = casino;
@@ -147,6 +149,7 @@ action travel(character : character, from : place, to : place) {
 		!closed(to) &
         connected_to(from,to);
 	effect:
+	did_something(character) =did_something(character)  +1 &
 		at(character) = to;
 	consenting: character;
 	observing(c : character) : alive(c) & (at(c) == from | at(c) == to);
@@ -163,6 +166,7 @@ action give(giver : character, item: item, taker : character, place : place) {
         at(item) == giver &
         controllable(giver) ;
 	effect:
+	did_something(giver)=did_something(giver)  +1 &
 		at(item) = taker;
 	consenting: giver;
 	observing(c : character) : alive(c) & at(c) == place ;
@@ -180,6 +184,7 @@ action buy(buyer : character, item: item, seller : character, place : place) {
         controllable(buyer) &
         has_money(buyer) != 0;
 	effect:
+	did_something(buyer)=did_something(buyer)  +1 &
 		at(item) = buyer &
         has_money(seller) = has_money(seller) + 1 &
         has_money(buyer) = has_money(buyer) - 1;
@@ -198,6 +203,7 @@ action give_money(giver : character,  taker : character, place : place) {
         controllable(giver) &
         has_money(giver) != 0;
 	effect:
+	did_something(giver)=did_something(giver)  +1 &
         has_money(taker) = has_money(taker) + 1 &
         has_money(giver) = has_money(giver) - 1;
 	consenting: giver;
@@ -212,14 +218,17 @@ action take(giver : character,item : item,  taker : character, place : place) {
 		at(taker) == place &
         at(giver) == place &
         controllable(taker) &
-        at(item) == giver &
-        (
-            !alive(giver) |
-            (armed(taker) & !armed(giver))
-        ) ;
+        at(item) == giver 
+		//&
+        //(
+         //   !alive(giver) |
+         //   (armed(taker) & !armed(giver))
+        //) 
+		;
         //paired(giver,taker);
 
 	effect:
+	did_something(giver)=did_something(giver)  +1 &
 		at(item) = taker;
 	consenting: taker;
 	observing(c : character) : alive(c) & at(c) == place;
@@ -241,6 +250,7 @@ action take_money(giver : character,  taker : character, place : place) {
         ) ;
         //paired(giver,taker);
 	effect:
+	did_something(giver)=did_something(giver)  +1 &
         has_money(taker) = has_money(taker) + 1 &
         has_money(giver) = has_money(giver) - 1;
 	consenting: taker;
@@ -257,6 +267,7 @@ action take_out_of(taker : character, item: item, container : item, place : plac
         controllable(taker) &
         !closed(container);
 	effect:
+	did_something(taker)=did_something(taker)  +1 &
 		at(item) = taker ;
 	consenting: taker;
 	observing(c : character) : alive(c) & at(c) == place;
@@ -275,6 +286,7 @@ action steal(giver : character,item : item,  taker : character, place : place) {
         occupied(giver);
 
 	effect:
+	did_something(giver)=did_something(giver)  +1 &
 		at(item) = taker ;
 	consenting: taker;
 	observing(c : character) : alive(c) & at(c) == place;
@@ -295,6 +307,7 @@ action kill(killer : character,  victim : character, place : place) {
         armed(killer);
 
 	effect:
+	did_something(killer)=did_something(killer)  +1 &
 		!alive(victim) &
         killed_by(victim) = killer ;
 	consenting: killer;
@@ -311,6 +324,7 @@ action invite(invited : character, inviter : character, from : place, to : place
         controllable(inviter) &
         !closed(to);
 	effect:
+	did_something(inviter)=did_something(inviter)  +1 &
 		at(invited) = to;
 	consenting: inviter;
 	observing(c : character) : alive(c) & (at(c) == from | at(c) == to);
@@ -327,6 +341,7 @@ action open_room(opener : character, key : key ,room : place, place : place) {
         connected_to(room,place) ;
 
 	effect:
+	did_something(opener)=did_something(opener)  +1 &
 		!closed(room);
 	consenting: opener;
 	observing(c : character) : alive(c) & (at(c) == room | at(c) == place);
@@ -344,6 +359,7 @@ action open_item(opener : character, key : key ,item : item, place : place) {
         opens(key) == item;
 
 	effect:
+	did_something(opener)=did_something(opener)  +1 &
 		!closed(item);
 	consenting: opener;
 	observing(c : character) : alive(c) & at(c) == place;
@@ -415,10 +431,7 @@ trigger not_armed(character : character) {
 //////////////////utility
 
 utility():
-	(if(at(thief) == saferoom & at(alcohol) == alko & at(gun) == soldier)
-		1
-	else
-		0) ;
+	did_something(thief) > 0 ;
 
 
 

@@ -31,23 +31,23 @@ entity money: item;
 entity book: item;  
 health(mc) = 15 ; 
 points(mc) = 0 ; 
-happiness(mc) = 10.429 ;
-altruism(mc) = 4 ;
+happiness(mc) = 10 ;
+altruism(mc) = 0 ;
 ambition(mc) = 0 ;
-likes(mc, doctor) = 2 ;
+likes(mc, doctor) = 0 ;
 likes(mc, science) = 0 ;
 likes(mc, agent) = 0 ;
 likes(mc, actor) = 0 ;
 likes(mc, tumblr) = 0 ;
-trusts(mc, doctor) = 2 ;
+trusts(mc, doctor) = 0 ;
 trusts(mc, science) = 0 ;
 trusts(mc, agent) = 0 ;
 trusts(mc, actor) = 0 ;
 trusts(mc, tumblr) = 0 ;
 health(agent) = 15 ; 
 points(agent) = 0 ; 
-happiness(agent) = 12.429 ;
-altruism(agent) = -19 ;
+happiness(agent) = 10 ;
+altruism(agent) = -17 ;
 ambition(agent) = 3 ;
 likes(agent, doctor) = 15 ;
 likes(agent, science) = 0 ;
@@ -56,56 +56,55 @@ likes(agent, tumblr) = 0 ;
 likes(agent, mc) = 0 ;
 trusts(agent, doctor) = 0 ;
 trusts(agent, science) = 0 ;
-trusts(agent, actor) = -1 ;
+trusts(agent, actor) = 0 ;
 trusts(agent, tumblr) = 0 ;
 trusts(agent, mc) = 0 ;
 has(agent, book) = 0 ;
-health(doctor) = 12 ; 
+health(doctor) = 15 ; 
 points(doctor) = 0 ; 
-happiness(doctor) = 17.715 ;
-altruism(doctor) = 21 ;
-ambition(doctor) = 16 ;
+happiness(doctor) = 10 ;
+altruism(doctor) = 17 ;
+ambition(doctor) = 15 ;
 likes(doctor, agent) = 0 ;
 likes(doctor, science) = 0 ;
 likes(doctor, actor) = 0 ;
 likes(doctor, tumblr) = 0 ;
-likes(doctor, mc) = 6 ;
+likes(doctor, mc) = 0 ;
 trusts(doctor, agent) = 0 ;
 trusts(doctor, science) = 0 ;
 trusts(doctor, actor) = 0 ;
 trusts(doctor, tumblr) = 0 ;
-trusts(doctor, mc) = 2 ;
+trusts(doctor, mc) = 0 ;
 has(doctor, food) = 0 ;
-has(doctor, money) = 0 ;
 health(science) = 15 ; 
 points(science) = 0 ; 
-happiness(science) = 11.143 ;
-altruism(science) = 10 ;
+happiness(science) = 10 ;
+altruism(science) = 8 ;
 ambition(science) = -17 ;
 likes(science, doctor) = 0 ;
 likes(science, agent) = 0 ;
-likes(science, actor) = 1 ;
+likes(science, actor) = 0 ;
 likes(science, tumblr) = 0 ;
 likes(science, mc) = 0 ;
 trusts(science, doctor) = 0 ;
 trusts(science, agent) = 0 ;
-trusts(science, actor) = 1 ;
+trusts(science, actor) = 0 ;
 trusts(science, tumblr) = 0 ;
 trusts(science, mc) = 0 ;
 has(science, food) = 0 ;
 health(actor) = 15 ; 
 points(actor) = 0 ; 
-happiness(actor) = 9.572000000000001 ;
-altruism(actor) = -4 ;
-ambition(actor) = 14 ;
+happiness(actor) = 10 ;
+altruism(actor) = -3 ;
+ambition(actor) = 17 ;
 likes(actor, doctor) = 0 ;
-likes(actor, science) = 3 ;
-likes(actor, agent) = -4 ;
+likes(actor, science) = 0 ;
+likes(actor, agent) = 0 ;
 likes(actor, tumblr) = 0 ;
 likes(actor, mc) = 0 ;
 trusts(actor, doctor) = 0 ;
-trusts(actor, science) = 1 ;
-trusts(actor, agent) = -1 ;
+trusts(actor, science) = 0 ;
+trusts(actor, agent) = 0 ;
 trusts(actor, tumblr) = 0 ;
 trusts(actor, mc) = 0 ;
 has(actor, money) = 1 ;
@@ -534,18 +533,18 @@ has(tumblr, money) = 0 ;
 
 	
 			utility(): 
- if (did_something(actor) ==1) 
-(if(happiness(actor)> 9.572000000000001) 1 else 0 ) + (if(has(actor,money)> 1) 1 else 0 ) + (if(altruism(actor) > -3) 1 else 0 )
+ if (did_something(agent) == 2) 
+(if(happiness(agent)> 10) 1 else 0 ) + (if(happiness(doctor)< 10) 1 else 0 ) + (if(happiness(science)< 10) 1 else 0 ) + (if(happiness(actor)< 10) 1 else 0 ) + (if(happiness(tumblr)< 10) 1 else 0 ) + (if(happiness(mc)< 10) 1 else 0 ) + (if(has(agent,book)>0) 1 else 0 )
 else 0; 
  utility(mc): 
- (if (happiness(mc)> 10.429) 1 else 0 );
+ (if (happiness(mc)> 10) 1 else 0 );
 utility(agent): 
- (if (happiness(agent)> 12.429) 1 else 0 ) + (if (happiness(doctor)< 17.715) 1 else 0 ) + (if (happiness(science)< 11.143) 1 else 0 ) + (if (happiness(actor)< 9.572000000000001) 1 else 0 ) + (if (happiness(tumblr)< 10) 1 else 0 ) + (if (happiness(mc)< 10.429) 1 else 0 ) + (if (ambition(agent) > 3) 1 else 0 );
+ (if (happiness(agent)> 10) 1 else 0 ) + (if (happiness(doctor)< 10) 1 else 0 ) + (if (happiness(science)< 10) 1 else 0 ) + (if (happiness(actor)< 10) 1 else 0 ) + (if (happiness(tumblr)< 10) 1 else 0 ) + (if (happiness(mc)< 10) 1 else 0 ) + (if (has(agent,book)>0) 1 else 0 );
 utility(doctor): 
- (if (happiness(doctor)> 17.715) 1 else 0 ) + (if (has(doctor,money)> 0) 1 else 0 ) + (if (has(doctor,money)>0) 1 else 0 );
+ (if (happiness(doctor)> 10) 1 else 0 ) + (if (has(doctor,money)> 0) 1 else 0 ) + (if (ambition(doctor) > 15) 1 else 0 );
 utility(science): 
- (if (happiness(science)> 11.143) 1 else 0 ) + (if (ambition(science) > -17) 1 else 0 );
+ (if (happiness(science)> 10) 1 else 0 ) + (if (ambition(science) > -17) 1 else 0 );
 utility(actor): 
- (if (happiness(actor)> 9.572000000000001) 1 else 0 ) + (if (has(actor,money)> 1) 1 else 0 ) + (if (altruism(actor) > -3) 1 else 0 );
+ (if (happiness(actor)> 10) 1 else 0 ) + (if (has(actor,money)> 1) 1 else 0 ) + (if (has(actor,money)>1) 1 else 0 );
 utility(tumblr): 
- (if (happiness(tumblr)> 10) 1 else 0 ) + (if (has(tumblr,food)>0) 1 else 0 );
+ (if (happiness(tumblr)> 10) 1 else 0 ) + (if (has(tumblr,book)>0) 1 else 0 );

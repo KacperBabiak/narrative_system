@@ -121,15 +121,20 @@ class Game:
 	def load_action(self,file):
 
 		
-		p = Popen(['java', '-jar', 'lib\sabre.jar', '-p', file,'-el',"0",'-g',"3","-tl","500"], stdout=PIPE, stderr=STDOUT)
-		
+		p = Popen(['java', '-jar', 'lib\sabre.jar', '-p', file,'-el',"0",'-g',"2","-tl","500","-v"], stdout=PIPE, stderr=STDOUT)
+		#p = Popen(['java', '-jar', 'lib\sabre.jar', '-p', file,'-el',"0",'-g',"","-tl","1000"], stdout=PIPE, stderr=STDOUT)
+
+		lines=[]
 		for line in p.stdout:
-			return (str(line, encoding='utf-8'))
+			lines.append(str(line, encoding='utf-8'))
+
+		print(lines)
+		return lines[0] 
 
 	#wykonuje akcje 
 	def do_action(self,args):
 		
-		print(args)
+		#print(args)
 		match args[0]:
 			case "give":
 				print("give")
@@ -191,7 +196,7 @@ class Game:
 		
 		args = action.replace("("," ").replace(")","").replace("\r\n","").replace(",","").split(' ')
 		self.do_action(args)
-		print(args)
+		#print(args)
 		return(action)
 		
 	def character_rotation(self):

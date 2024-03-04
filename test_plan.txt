@@ -1,0 +1,20 @@
+
+potencjalnie wiele kroków na raz gdy używany jest tylko satisfaction?
+1.przemyśl dokładnie wszystko, cały gameplay loop zmiany relacji wazne dla fabuly
+wiele celów?
+dodawanie satsfaction?
+jesli wysoki altruizm to obchodzi ich tez satisfaction innych?
+ambicja?
+przemyśl emocje, jakie dają kiedy ile hap
+do końca akcje, dialogi, walka
+cały gameplay loop wyspy
+rozkazy?
+zaprogramuj to
+
+klasyfikator który zmienia stan swiata według komendy, moze tez przewiduje co sie stanie
+prezentacja
+reakcje
+eatpy pływania
+-oszukiwanie
+-relacje
+-reakcje

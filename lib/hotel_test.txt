@@ -51,7 +51,7 @@ has(agent, money) = 1 ;
 
 health(doctor) = 100 ; 
 points(doctor) = 0 ; 
-happiness(doctor) = 18.75 ;
+happiness(doctor) = 10 ;
 altruism(doctor) = 17 ;
 ambition(doctor) = 15 ;
 likes(doctor, agent) = 0 ;
@@ -81,7 +81,7 @@ has(science, money) = 0 ;
 
 health(actor) = 10 ; 
 points(actor) = 0 ; 
-happiness(actor) = 4 ;
+happiness(actor) = 10 ;
 altruism(actor) = -1 ;
 ambition(actor) = 4 ;
 likes(actor, doctor) = 5 ;
@@ -95,7 +95,7 @@ trusts(actor, tumblr) = 1 ;
 has(actor, money) = 1 ;
 health(tumblr) = 100 ; 
 points(tumblr) = 0 ; 
-happiness(tumblr) = 10.5 ;
+happiness(tumblr) = 10 ;
 altruism(tumblr) = 2 ;
 ambition(tumblr) = 2 ;
 likes(tumblr, doctor) = 0 ;
@@ -406,7 +406,7 @@ has(tumblr, money) = 0 ;
 			did_something(char) = did_something(char) + 1
 			
 			
-			&happiness(char) =happiness(char) +  (likes(char,other)/3)
+			&happiness(char) =happiness(char) - 10
 			&altruism(char) = altruism(char)+  2
 			&likes(char,other) =likes(char,other) +  3
 			&trusts(char,other) = trusts(char,other) + 2
@@ -508,15 +508,22 @@ has(tumblr, money) = 0 ;
 	//////////////////utility
 
 	
-utility(): 
-			if (did_something(agent) ==1)
-			(if(happiness(agent)>10) 1 else 0) + (if(has(science,money)>0) 1 else 0)  
-			
-			else 0;
- 
+utility():
+    (sum(c:character) did_something(c) > 5) 
+    & did_something(actor)> 0
+    & did_something(agent)> 0
+    & did_something(science)> 0
+    & did_something(doctor)> 0
+    & did_something(tumblr)> 0
+    ;
+
 utility(agent): 
-   (if(happiness(agent)>10) 1 else 0) + (if(has(science,money)>0) 1 else 0) ;
-
-utility(science):
-has(science,weapon);
-
+    did_something(agent)> 0 & happiness(agent)>10;
+utility(doctor): 
+    did_something(doctor)> 0 & happiness(doctor)>10;
+utility(science): 
+    did_something(science)> 0 & happiness(science)>10;
+utility(actor): 
+    did_something(actor)> 0 & happiness(actor)>10;
+utility(tumblr): 
+    did_something(tumblr)> 0 & happiness(tumblr)>10 ;
