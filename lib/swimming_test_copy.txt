@@ -1,0 +1,501 @@
+/////////////////////////////////////types
+
+
+type character;
+type item ;
+
+//////////////////////////////////property
+
+
+//character
+
+property health(char: character) : number;
+property satisfaction(char: character) : number;
+property has(character : character, item:item) : number;
+property knows_location(character : character, item:item) : boolean;
+property altruism(char: character) : number;
+property ambition(char: character) : number;
+property likes(char: character, char2: character) : number;
+property wants_to_attack(character : character, char2: character) : boolean;
+property quantity(item : item) : number;entity Gold: item;  
+quantity( Gold) = 5;  
+entity Fuel: item;  
+quantity( Fuel) = 5;  
+entity Meds: item;  
+quantity( Meds) = 5;  
+entity Food: item;  
+quantity( Food) = 5;  
+entity Actress: character;  
+health(Actress) = 1.0 ; 
+altruism(Actress) = 21.0 ;
+ambition(Actress) = 3.0 ;
+satisfaction(Actress) = 1.0 ;
+has(Actress,Gold) = 0.0 ; 
+has(Actress,Fuel) = 0.0 ; 
+has(Actress,Meds) = 1.0 ; 
+//knows_location(Actress,Meds) ; 
+has(Actress,Food) = 0.0 ; 
+likes(Actress,Actor) = -5.0 ; 
+wants_to_attack(Actress,Actor) ; 
+likes(Actress,Agent) = 0.0 ; 
+likes(Actress,Mc) = 0.0 ; 
+entity Actor: character;  
+health(Actor) = 3.0 ; 
+altruism(Actor) = -1.0 ;
+ambition(Actor) = 5.0 ;
+satisfaction(Actor) = 5.25 ;
+has(Actor,Gold) = 2.0 ; 
+has(Actor,Fuel) = 3.0 ; 
+has(Actor,Meds) = 0.0 ; 
+has(Actor,Food) = 0.0 ; 
+likes(Actor,Actress) = 0.0 ; 
+likes(Actor,Agent) = 0.0 ; 
+likes(Actor,Mc) = 0.0 ; 
+entity Agent: character;  
+health(Agent) = 2.5 ; 
+altruism(Agent) = -21.0 ;
+ambition(Agent) = 4.0 ;
+satisfaction(Agent) = 10.25 ;
+has(Agent,Gold) = 0.0 ; 
+has(Agent,Fuel) = 0.0 ; 
+has(Agent,Meds) = 0.0 ; 
+has(Agent,Food) = 3.0 ; 
+likes(Agent,Actress) = 0.0 ; 
+likes(Agent,Actor) = 0.0 ; 
+likes(Agent,Mc) = 0.0 ; 
+entity Mc: character;  
+health(Mc) = 2.0 ; 
+altruism(Mc) = 0.0 ;
+ambition(Mc) = 9.0 ;
+satisfaction(Mc) = 0.0 ;
+has(Mc,Gold) = 1.0 ; 
+has(Mc,Fuel) = 1.0 ; 
+has(Mc,Meds) = 0.0 ; 
+has(Mc,Food) = 0.0 ; 
+likes(Mc,Actress) = 0.0 ; 
+likes(Mc,Actor) = 0.0 ; 
+likes(Mc,Agent) = -5.0 ; 
+wants_to_attack(Mc,Agent) ; 
+
+											////////////////////////////////////////actions
+
+
+						action search_for(char : character, item:item) {
+							precondition:
+							!knows_location(char,item)
+							&health(char) > 0
+		   					&char != Mc
+							;
+
+							effect:
+							knows_location(char,item)
+							&  satisfaction(char) = satisfaction(char) + 1
+							& health(char) = health(char) - 1 
+							
+							;
+							consenting: char;
+							
+						};
+
+						action ask_for_location(char : character,char2 : character, item:item) {
+							precondition:
+							char != char2
+		   					&char != Mc
+							&!knows_location(char,item)
+							&knows_location(char2,item)
+							&quantity(item) > 0
+							&health(char) > 0
+							&health(char2) > 0
+							;
+
+							effect:
+							knows_location(char,item)
+							&  satisfaction(char) = satisfaction(char) + (altruism(char)/5) + (likes(char,char2)/5)
+							&  satisfaction(char2) = satisfaction(char) +(altruism(char2)/5) + (likes(char2,char)/5)
+							&altruism(char) = altruism(char) + 2
+							&likes(char,char2) = likes(char,char2) + 2
+							;
+							consenting: char;
+							
+						};
+
+						//oszukaj z lokacja
+						action pay_for_location(char : character,char2 : character, item:item, ex_item:item) {
+							precondition:
+							char != char2
+		   					&char != Mc
+							&!knows_location(char,item)
+							&knows_location(char2,item)
+							&has(char,ex_item)>0
+							&quantity(item) > 0
+							&health(char) > 0
+							&health(char2) > 0
+							;
+
+							effect:
+							knows_location(char,item)
+							& has(char,ex_item) = has(char,ex_item) - 1
+							& has(char2,ex_item) = has(char2,ex_item) +1
+
+							&  satisfaction(char) = satisfaction(char)  + 2
+							&  satisfaction(char2) = satisfaction(char)  + 2
+
+							&likes(char2,char) = likes(char2,char) + 1
+							&likes(char,char2) = likes(char,char2) + 1
+							;
+							consenting: char,char2;
+							
+						};
+
+						action attack_for_location(char : character,char2 : character, item:item) {
+							precondition:
+							char != char2
+		   					&char != Mc
+							&!knows_location(char,item)
+							&knows_location(char2,item)
+							&quantity(item) > 0
+							&health(char) > 0
+							&health(char2) > 0
+							;
+
+							effect:
+							knows_location(char,item)
+							& satisfaction(char) = satisfaction(char) + (altruism(char)/ -7) 
+							& satisfaction(char2) = satisfaction(char)  - 5 
+							&wants_to_attack(char2,char)
+							&health(char) = health(char) - 0.5
+							&health(char2) = health(char2) - 1
+							&ambition(char2) = ambition(char2) - 1
+							&likes(char2,char) = likes(char2,char) - 5
+							;
+							consenting: char;
+							
+						};
+
+
+						action find(char : character,item : item) {
+							precondition:
+								knows_location(char,item)
+								&quantity(item) > 0
+								&health(char) > 0
+		   						&char != Mc
+								;
+								
+
+							effect:
+							
+							has(char,item) = has(char,item)  + 1
+							&quantity(item) = quantity(item) - 1
+							&  satisfaction(char) =satisfaction(char) + 1
+							
+							;
+							consenting: char;
+							
+						};
+
+						action ask_for_item(char : character, other: character, item : item) {
+								precondition:
+									char != other
+									&has(other, item) > 0
+									&health(char) > 0
+									&health(other) > 0
+		   							&char != Mc
+									;
+
+								effect:
+									
+									has(char, item) = has(char, item) + 1
+									&has(other, item) = has(other, item) - 1
+									& satisfaction(char) = satisfaction(char) + (altruism(char)/8) + (likes(other,char)/8) 
+									&likes(char,other) = likes(char,other) + 4
+									;
+								consenting: char,other;
+								
+							};
+
+
+						action take_item(char : character, other: character, item : item) {
+								precondition:
+									char != other
+									&has(other, item) > 0
+									&health(char) > 0
+									&health(other) > 0
+									&char != Mc
+									;
+
+								effect:
+									
+
+									has(char, item) = has(char, item)  +1
+									&has(other, item) = has(other, item) - 1
+									&wants_to_attack(other,char)
+									&satisfaction(char) = satisfaction(char) + (  likes(char,other)/ -4) + ( altruism(char)/ -4) 
+									&health(char) = health(char) - 0.5
+									&health(other) = health(other) - 1
+									&ambition(other) = ambition(other) - 1
+									&likes(other,char) = likes(other,char) - 5
+									;
+								consenting: char;
+								
+							};
+							
+
+						action exchange_item(char : character, other: character, item1 : item, item2 :item) {
+								precondition:
+									char != other
+									&item1 !=item2
+									&has(char, item1) >0
+									&has(other, item2) >0
+									&health(char) > 0
+									&health(other) > 0
+		  							 &char != Mc
+									;
+
+								effect:
+									
+
+									has(char, item1) = has(char, item1) - 1
+									&has(other, item1) = has(other, item1) + 1
+
+									&has(char, item2) = has(char, item2) + 1
+									&has(other, item2) = has(other, item2) - 1
+									&satisfaction(char) = satisfaction(char) + 5
+									&satisfaction(other) = satisfaction(other) + 5 
+									
+									;
+								consenting: char,other;
+								
+							};
+
+
+						action give_item(char : character, other: character, item : item) {
+								precondition:
+									char != other
+									&has(char, item) > 0
+									&health(char) > 0
+									&health(other) > 0
+		   
+		   							&char != Mc
+									;
+
+								effect:
+									
+
+									has(char, item) = has(char, item)  - 1
+									&has(other, item) = has(other, item) + 1
+									&satisfaction(char) = satisfaction(char) + (  likes(char,other)/7) + ( altruism(char)/7) 
+									&satisfaction(other) = satisfaction(other) +5
+									;
+								consenting: char,other;
+								
+							};
+
+
+
+
+						action use_meds(char : character) {
+							precondition:
+								has(char,Meds) > 0
+								& 0 < health(char) < 2
+								;
+								
+
+							effect:
+							health(char)  = 4
+							&satisfaction(char) = satisfaction(char) +1
+							&has(char,Meds) = has(char,Meds) - 1;
+							consenting: char;
+							
+						};
+
+
+						action rest(char : character) {
+								precondition:
+									
+									health(char) > 0
+									&char != Mc
+									;
+
+								effect:
+									health(char) = health(char) + 1
+									//&satisfaction(char) = satisfaction(char) + 0
+								
+
+
+									
+									
+									;
+								consenting: char;
+								
+							};
+
+						/*
+						action compliment(char : character, other: character) {
+								precondition:
+									char != other
+									&health(char) > 0
+									&health(other) > 0
+									&char != Mc
+									;
+
+								effect:
+									
+									
+									
+
+									likes(char,other) =likes(char,other) +  1
+									&satisfaction(char) = 1 + (altruism(char)/7) + likes(char,other)
+
+
+									
+									&altruism(other) = altruism(other)+  2
+									&likes(other,char) =likes(other,char) +  3
+									
+									
+									;
+								consenting: char;
+								
+							};
+						*/
+
+						action attack(char : character, other: character) {
+								precondition:
+									char != other
+									//&health(char) > 0
+									//&points(char) > 0
+									//&altruism(char) < -13
+									//&ambition(char) > 13
+									&char != Mc
+									&wants_to_attack(char,other)
+									&health(char) > 0
+									&health(other) > 0
+									;
+
+								effect:
+									
+									altruism(char) = altruism(char) -  4	
+									&satisfaction(char) = satisfaction(char) + 1
+
+									&health(char) = health(char) - 0
+									&health(other) = health(other) - 1
+									&ambition(other) = ambition(other) - 1
+									&altruism(other) = altruism(other) - 4
+									&likes(other,char) =likes(other,char) - 4
+									&wants_to_attack(other,char)
+									
+									;
+								consenting: char;
+								
+							};
+
+						action ask_for_help(char : character, other: character, attacked : character) {
+								precondition:
+									char != other
+									&health(other) > 0
+									&health(char) >0
+									&char != Mc
+									&wants_to_attack(char,attacked)
+									;
+
+								effect:
+									
+										
+									satisfaction(char) = satisfaction(char) + 1 + (likes(char,other)/5)
+									&satisfaction(other) = satisfaction(other) + (altruism(other)/-8) + (likes(other, char)/5) + (likes(other,attacked)/-5)
+
+									
+									&altruism(other) = altruism(other) + 1
+		   							&likes(char,other) = likes(other,char) + 4
+		   
+									&wants_to_attack(other,attacked)
+									
+									
+									;
+								consenting: char;
+								
+							};
+
+						action spend_time_together(char : character, other: character) {
+								precondition:
+									char != other
+									&char != Mc
+									&health(char) >0
+									&health(other) >0
+									;
+
+								effect:
+									
+									
+									satisfaction(char) =  satisfaction(char) + (likes(char,other)/4)
+									&altruism(char) = altruism(char)+  2
+									&likes(char,other) =likes(char,other) +  3
+									
+
+									&satisfaction(other) = satisfaction(char) +  (likes(other,char)/4)
+									&altruism(other) = altruism(other)+  2
+									&likes(other,char) = likes(other,char) +  3
+									
+									
+									;
+								consenting: char,other;
+								
+							};
+
+							action intimidate(char : character, other: character) {
+								precondition:
+									char != other
+									&health(char) > 0
+									&health(other) > 0
+									&char != Mc
+									;
+
+								effect:
+									
+									
+									satisfaction(char) = (altruism(char)/7 * -1) - (likes(char,other)/7)
+									&altruism(char) = altruism(char) - 2
+									
+
+
+									&satisfaction(other) =-2 - (likes(other,char)/7) 
+								
+									&altruism(other) = altruism(other) - 3
+									&likes(other,char) =likes(other,char) -  4
+									
+									
+									;
+								consenting: char;
+
+							};
+
+			utility(): 
+if(health(Actress)<2) 0
+								else 
+ (if (knows_location(Actress,Meds)) 1 else 0 ) + (if (has(Actress,Meds) > 1 ) 1 else 0 ) + (if(exists(c : character) (wants_to_attack(Actress,c) & health(c)<2)) 1  else 0) 
+
+;
+utility(Actress): 
+ if(health(Actress)<2) 0
+ elseif
+		((exists(c : character) (wants_to_attack(Actress,c) & health(c)>2)))
+									0
+									else
+										(if(has(Actress,Meds) > 1  ) satisfaction(Actress) else 0)
+									
+									; 
+utility(Actor): 
+ if(health(Actor)<3) 0
+								else 
+									(if (exists(c : character) (wants_to_attack(Actor,c) & health(c)>1))
+									0
+									else
+										(if(has(Actor,Fuel) > 3  ) satisfaction(Actor) else 0)
+									) ; 
+utility(Agent): 
+ if(health(Agent)<3) 0
+								else 
+									(if (exists(c : character) (wants_to_attack(Agent,c) & health(c)>1))
+									0
+									else
+										(if(has(Agent,Food) > 3  ) satisfaction(Agent) else 0)
+									) ; 

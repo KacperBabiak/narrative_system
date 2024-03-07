@@ -4,37 +4,41 @@ import random
 class Character:
     
 
-    def __init__(self,gl, name, altruism,ambition,points = 0,health = 15) -> None:
+    def __init__(self,gl, name, altruism,ambition, sat = 0,health = 2) -> None:
             self.name = name
-            self.points = points
             self.health = health
 
-            self.happiness = 10
+            self.satisfaction = sat
             self.altruism = altruism
             self.ambition = ambition
 
             self.gameLogic = gl
 
             self.likes = {}
-            self.trusts = {} 
 
-            self.goals = []
-            self.start_goals = []
+            #self.goals = []
+            #self.start_goals = []
              
             self.items = {}
+            self.knows_location = set()
+            self.wants_to_attack = set()
      
             
     
 
-    def add_char(self,character, like, trust) -> None :
+    def add_char(self,character, like) -> None :
          self.likes[character] = like
-         self.trusts[character] = trust
+         
 
     def add_item(self,item):
         if item in self.items.keys():
             self.items[item] += 1
         else: self.items[item] = 0 
     
+
+        
+        
+
     def check_goals(self):
 
         goals = []
@@ -145,7 +149,18 @@ class Character:
             
             return g    
              
+    def search_for(self, item):
+        
 
+        self.happiness += round(self.likes[other]/6,3)
+        self.altruism +=  2
+        self.likes[other] +=  1
+
+        
+        other.happiness +=  3
+        other.altruism +=  3
+        other.likes[self] +=  2
+        other.trusts[self] += 2
             
         
     def give(self, other, item):

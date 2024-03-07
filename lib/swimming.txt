@@ -1,13 +1,8 @@
 /////////////////////////////////////types
 
-//zmien na domyslne typy?
 
 type character;
 type item ;
-type subject;
-
-
-
 
 //////////////////////////////////property
 
@@ -15,26 +10,17 @@ type subject;
 //character
 
 property health(char: character) : number;
-property fullness(char: character) : number;
-
 property satisfaction(char: character) : number;
 property has(character : character, item:item) : number;
-
 property knows_location(character : character, item:item) : boolean;
-
-
 property altruism(char: character) : number;
-//property ambition(char: character) : number;
+property ambition(char: character) : number;
 property likes(char: character, char2: character) : number;
-
 property wants_to_attack(character : character, char2: character) : boolean;
-
-
 property quantity(item : item) : number;
 ///////////////////////////////////entity
 
 
-entity subject1 : subject;
 entity mc : character;
 
 entity alko : character;
@@ -43,17 +29,21 @@ entity alko : character;
 //entity alko3 : character;
 
 entity soldier : character;
-altruism(soldier) = 15;
-knows_location(soldier, food); 
-//has(soldier,food) = 2;
+altruism(soldier) = -15;
+health(soldier) = 3;
+ambition(soldier) = 3;
+//knows_location(soldier, food); 
+has(soldier,food) = 2;
 
 entity doctor : character;
-health(doctor) = 1;
-fullness(doctor) = 0;
-has(doctor,weapon) = 2;
-altruism(doctor) = -15;
+health(doctor) = 5;
+ambition(doctor) = -15;
+//wants_to_attack(doctor,soldier);
+has(doctor,weapon) = 1;
+altruism(doctor) = 15;
 //ambition(doctor) = 3;
-likes(doctor,soldier) = 10;
+likes(doctor,soldier) = 0;
+satisfaction(doctor) = 1;
 
 
 //has(doctor,food) = 2;
@@ -74,12 +64,13 @@ entity meds : item;
 action search_for(char : character, item:item) {
 	precondition:
     !knows_location(char,item)
+	&health(char) > 0
 	;
 
 	effect:
     knows_location(char,item)
     &  satisfaction(char) = satisfaction(char) + 1
-    & health(char) = health(char) - 5 
+    & health(char) = health(char) - 1 
     
 	;
 	consenting: char;
@@ -92,16 +83,18 @@ action ask_for_location(char : character,char2 : character, item:item) {
     &!knows_location(char,item)
     &knows_location(char2,item)
     &quantity(item) > 0
+	&health(char) > 0
+	&health(char2) > 0
 	;
 
 	effect:
     knows_location(char,item)
-    &  satisfaction(char) = satisfaction(char) + (altruism(char)/7) + (likes(char,char2)/7)
-    &  satisfaction(char2) = satisfaction(char) +(altruism(char2)/7) + (likes(char2,char)/7)
+    &  satisfaction(char) = satisfaction(char) + (altruism(char)/5) + (likes(char,char2)/5)
+    &  satisfaction(char2) = satisfaction(char) +(altruism(char2)/5) + (likes(char2,char)/5)
     &altruism(char) = altruism(char) + 2
     &likes(char,char2) = likes(char,char2) + 2
 	;
-	consenting: char,char2;
+	consenting: char;
 	
 };
 
@@ -113,6 +106,8 @@ action pay_for_location(char : character,char2 : character, item:item, ex_item:i
     &knows_location(char2,item)
     &has(char,ex_item)>0
     &quantity(item) > 0
+	&health(char) > 0
+	&health(char2) > 0
 	;
 
 	effect:
@@ -136,6 +131,8 @@ action attack_for_location(char : character,char2 : character, item:item) {
     &!knows_location(char,item)
     &knows_location(char2,item)
     &quantity(item) > 0
+	&health(char) > 0
+	&health(char2) > 0
 	;
 
 	effect:
@@ -143,9 +140,9 @@ action attack_for_location(char : character,char2 : character, item:item) {
     & satisfaction(char) = satisfaction(char) + (altruism(char)/ -7) 
     & satisfaction(char2) = satisfaction(char)  - 5 
     &wants_to_attack(char2,char)
-    &health(char) = health(char) - 1
-    &health(char2) = health(char2) - 4
-
+    &health(char) = health(char) - 0.5
+    &health(char2) = health(char2) - 1
+	&ambition(char2) = ambition(char2) - 1
     &likes(char2,char) = likes(char2,char) - 5
 	;
 	consenting: char;
@@ -157,6 +154,7 @@ action find(char : character,item : item) {
 	precondition:
 		knows_location(char,item)
         &quantity(item) > 0
+		&health(char) > 0
 		;
         
 
@@ -165,7 +163,7 @@ action find(char : character,item : item) {
 	has(char,item) = has(char,item)  + 1
     &quantity(item) = quantity(item) - 1
     &  satisfaction(char) =satisfaction(char) + 1
-    &health(char) =  health(char) - 1
+    
     ;
 	consenting: char;
 	
@@ -175,7 +173,8 @@ action ask_for_item(char : character, other: character, item : item) {
 		precondition:
 			char != other
 			&has(other, item) > 0
-				
+			&health(char) > 0
+			&health(other) > 0
 			;
 
 		effect:
@@ -183,7 +182,6 @@ action ask_for_item(char : character, other: character, item : item) {
 			has(char, item) = has(char, item) + 1
 			&has(other, item) = has(other, item) - 1
 			& satisfaction(char) = satisfaction(char) + (altruism(char)/8) + (likes(other,char)/8) 
-            & health(char) = health(char) - 1
 			&likes(char,other) = likes(char,other) + 4
 			;
 		consenting: char,other;
@@ -195,7 +193,8 @@ action take_item(char : character, other: character, item : item) {
 		precondition:
 			char != other
 			&has(other, item) > 0
-			
+			&health(char) > 0
+			&health(other) > 0
 			
 			;
 
@@ -205,8 +204,11 @@ action take_item(char : character, other: character, item : item) {
 			has(char, item) = has(char, item)  +1
 			&has(other, item) = has(other, item) - 1
 			&wants_to_attack(other,char)
-            &satisfaction(char) = satisfaction(char) + (  likes(char,other)/ -7) + ( altruism(char)/ -7) 
-			
+            &satisfaction(char) = satisfaction(char) + (  likes(char,other)/ -4) + ( altruism(char)/ -4) 
+			&health(char) = health(char) - 0.5
+    		&health(other) = health(other) - 1
+			&ambition(other) = ambition(other) - 1
+    		&likes(other,char) = likes(other,char) - 5
 			;
 		consenting: char;
 		
@@ -219,7 +221,8 @@ action exchange_item(char : character, other: character, item1 : item, item2 :it
 			&item1 !=item2
 			&has(char, item1) >0
 			&has(other, item2) >0
-			
+			&health(char) > 0
+			&health(other) > 0
 			;
 
 		effect:
@@ -243,8 +246,8 @@ action give_item(char : character, other: character, item : item) {
 		precondition:
 			char != other
 			&has(char, item) > 0
-			
-			
+			&health(char) > 0
+			&health(other) > 0
 			;
 
 		effect:
@@ -260,29 +263,18 @@ action give_item(char : character, other: character, item : item) {
 	};
 
 
-action eat(char : character) {
-	precondition:
-		has(char,food) > 0
-		;
-        
 
-	effect:
-	fullness(char) = fullness(char) + 1
-    //&satisfaction(char) = satisfaction(char) + 0
-	&has(char,food) = has(char,food) - 1;
-	consenting: char;
-	
-};
 
 action use_meds(char : character) {
 	precondition:
 		has(char,meds) > 0
+		&health(char) > 0
 		;
         
 
 	effect:
-	health(char)  = health(char) + 3
-    //&satisfaction(char) = satisfaction(char) +2
+	health(char)  = 4
+    &satisfaction(char) = satisfaction(char) +1
 	&has(char,meds) = has(char,meds) - 1;
 	consenting: char;
 	
@@ -297,8 +289,8 @@ action rest(char : character) {
 			;
 
 		effect:
-			health(char) = health(char) + 5
-			&satisfaction(char) = satisfaction(char) + 1
+			health(char) = health(char) + 1
+			//&satisfaction(char) = satisfaction(char) + 0
 		
 
 
@@ -347,6 +339,8 @@ action attack(char : character, other: character) {
 			//&ambition(char) > 13
 			&char != mc
             &wants_to_attack(char,other)
+			&health(char) > 0
+			&health(other) > 0
 			;
 
 		effect:
@@ -354,8 +348,9 @@ action attack(char : character, other: character) {
 			altruism(char) = altruism(char) -  4	
             &satisfaction(char) = satisfaction(char) + (altruism(char)/7) + (likes(char,other)/7)
 
-
-			&health(other) = health(other) - 3
+			&health(char) = health(char) - 0.5
+			&health(other) = health(other) - 1
+			&ambition(other) = ambition(other) - 1
 			&altruism(other) = altruism(other) - 4
 			&likes(other,char) =likes(other,char) - 4
 			&wants_to_attack(other,char)
@@ -368,7 +363,8 @@ action attack(char : character, other: character) {
 action ask_for_help(char : character, other: character, attacked : character) {
 		precondition:
 			char != other
-			
+			&health(other) > 0
+			&health(char) >0
 			&char != mc
             &wants_to_attack(char,attacked)
 			;
@@ -380,7 +376,7 @@ action ask_for_help(char : character, other: character, attacked : character) {
 
 
 			
-			&altruism(other) = altruism(other) - 1
+			&altruism(other) = altruism(other) + 1
 			&wants_to_attack(other,attacked)
 			
 			
@@ -393,6 +389,8 @@ action spend_time_together(char : character, other: character) {
 		precondition:
 			char != other
 			&char != mc
+			&health(char) >0
+			&health(other) >0
 			;
 
 		effect:
@@ -443,34 +441,64 @@ action spend_time_together(char : character, other: character) {
 //////////////////utility
 
 utility():
-(if (knows_location(doctor,food)) 1 else 0 ) + (if (has(doctor,food) >0 ) 1 else 0 )	 + fullness(doctor) 
+(if (knows_location(doctor,food)) 1 else 0 ) + (if (has(doctor,food) >0 ) 1 else 0 ) + (if(exists(c : character) (wants_to_attack(doctor,c) & health(c)<2)) 1  else 0)
 //(if(health(alko) > 0) 1 else 0)
 //satisfaction(doctor) 
 //wants_to_attack(soldier,doctor);
 //full(doctor)
+//wants_to_attack(doctor,soldier);
+//if (health(soldier)< 10) 1 else 0
 ;
-//fullness(doctor);
+
 
 
 
 utility(doctor):
 //(has(doctor,food) > 0);
 //if (knows_location(doctor,food)) 1 else 0;
-//if(fullness(doctor) > 0) satisfaction(doctor) else 0;
-//fullness(doctor);
 //if(health(alko) > 3) satisfaction(doctor) else 0;
-if(fullness(doctor) > 0) satisfaction(doctor) else 0;
+
+//if(exists(c : character) wants_to_attack(doctor,c)) 1 else 0;
+//(if(exists(c : character) (wants_to_attack(doctor,c) & health(c)<1)) 1  else 0)
+
+if(health(doctor)<4) 0
+else 
+	(if (exists(c : character) (wants_to_attack(doctor,c) & health(c)>1))
+	0
+	else
+		(if(has(doctor,food) > 0  ) satisfaction(doctor) else 0)
+	) 
+ 
+
+
+	
+;
+
+//(if(health(soldier)<2 ) satisfaction(doctor) else 0);
+
 
 //satisfaction(doctor) ;
-//wants_to_attack(soldier,doctor);
+//wants_to_attack(doctor,soldier);
+//health(soldier)<10;
 
 utility(alko):
 (has(alko,item1) > 0);
 
 utility(soldier):
-if(has(alko,weapon)>0) satisfaction(soldier) else 0;
+//if(has(alko,weapon)>0) satisfaction(soldier) else 0;
 //(has(alko,weapon)) + satisfaction(soldier);
+if(health(soldier)<4) 0
+else 
+	(if (exists(c : character) (wants_to_attack(soldier,c) & health(c)>1))
+	0
+	else
+		(if(has(soldier,food) > 0  ) satisfaction(soldier) else 0)
+	) 
+ 
 
+
+	
+;
 
 
 

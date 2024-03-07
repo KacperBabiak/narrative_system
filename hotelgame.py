@@ -19,11 +19,15 @@ class Game:
 
 		food = Item("food")
 		money = Item("money")
-		book = Item("book")
+		meds = Item("meds")
+		parts = Item("parts")
+		fuel = Item("fuel")
 
 		items["food"] = food
 		items["money"] = money
-		items["book"] = book
+		items["meds"] = meds
+		items["parts"] = parts
+		items["fuel"] = fuel
 
 		mc = chr.Character(self.gl, "mc", 0, 0 )
 		characters["mc"]=mc
