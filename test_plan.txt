@@ -1,5 +1,7 @@
 
 potencjalnie wiele kroków na raz gdy używany jest tylko satisfaction?
+planner bierz pod uwage innych akcje?
+nazwy efektów typu porwót gdy postac prawie umrze i wróci
 cel zdrowia atakowanego też się zmienia? aż do zabicia? moze w zależnosci od charatkeru? a moze zzabicie to oddzielna akcja?
 ucieczka z wyspy jako status, trigger?
 uciekanie jesli osiagnal cel? a moze robienie tego co chce? zostaje x tur po osiagnieciu? a moze zdobywa przedmiot do jakiegoś poziomu?
@@ -15,6 +17,7 @@ sprawdzanie smierci w kodzie i czy osiagnal cel, wtedy tez nie chce wants to fig
 stopnie wants to fight
 jesli wysoki altruizm to obchodzi ich tez satisfaction innych?
 believeies?
+jedna postac wyberasz na pokład, inne moga dołaczyć gdy ich statek zostanie zniszczony
 zabezpieczenie jesli trwa za dlugo
 rózne wartosci ambition
 tablica wiadomosci do wyswietlenia

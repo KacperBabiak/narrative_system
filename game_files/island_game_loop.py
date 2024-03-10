@@ -16,7 +16,7 @@ class Island_Loop:
 		#self.characters.append('Mc')
 
 		
-		self.items = ['Gold','Fuel','Meds','Food']
+		self.items = ['Gold','Fuel','Meds','Food','Map']
 		self.current_character = random.choice([x for x in self.characters if x!= "Mc"])
 		
 		
@@ -758,7 +758,8 @@ property quantity(item : item) : number;"""
 		
 		for char in [x for x in self.characters if x!= "Mc"]:
 			if self.world_state.at[char,'Health'] == 0 or self.world_state.at[char,'Ambition']== 0:
-				self.world_state.drop(char)
+				self.world_state.drop(char,inplace=True)
+				self.characters.remove(char)
 				
 			
 

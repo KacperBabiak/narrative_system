@@ -1,6 +1,5 @@
 /////////////////////////////////////types
 
-
 type character;
 type item ;
 
@@ -25,58 +24,65 @@ entity Meds: item;
 quantity( Meds) = 5;  
 entity Food: item;  
 quantity( Food) = 5;  
+entity Map: item;  
+quantity( Map) = 3;  
 entity Mc: character;  
-health(Mc) = 3.0 ; 
+health(Mc) = 2.0 ; 
 altruism(Mc) = 0.0 ;
-ambition(Mc) = 10.0 ;
+ambition(Mc) = 9.0 ;
 satisfaction(Mc) = 0.0 ;
 has(Mc,Gold) = 1.0 ; 
 has(Mc,Fuel) = 1.0 ; 
 has(Mc,Meds) = 0.0 ; 
-has(Mc,Food) = 1.0 ; 
-likes(Mc,Nagi) = 0.0 ; 
-likes(Mc,Actor) = 0.0 ; 
+has(Mc,Food) = 0.0 ; 
+has(Mc,Map) = 0.0 ; 
+likes(Mc,Actress) = 0.0 ; 
 likes(Mc,Coward) = 0.0 ; 
-entity Nagi: character;  
-health(Nagi) = 2.0 ; 
-altruism(Nagi) = 0.0 ;
-ambition(Nagi) = 2.0 ;
-satisfaction(Nagi) = 5.0 ;
-has(Nagi,Gold) = 3.0 ; 
-has(Nagi,Fuel) = 0.0 ; 
-has(Nagi,Meds) = 1.0 ; 
-has(Nagi,Food) = 0.0 ; 
-likes(Nagi,Mc) = 0.0 ; 
-likes(Nagi,Actor) = 0.0 ; 
-likes(Nagi,Coward) = 0.0 ; 
-entity Actor: character;  
-health(Actor) = 2.5 ; 
-altruism(Actor) = -1.0 ;
-ambition(Actor) = 4.0 ;
-satisfaction(Actor) = 5.25 ;
-has(Actor,Gold) = 0.0 ; 
-has(Actor,Fuel) = 3.0 ; 
-has(Actor,Meds) = 0.0 ; 
-has(Actor,Food) = 1.0 ; 
-likes(Actor,Mc) = 0.0 ; 
-likes(Actor,Nagi) = -5.0 ; 
-wants_to_attack(Actor,Nagi) ; 
-likes(Actor,Coward) = 0.0 ; 
+likes(Mc,Agent) = -5.0 ; 
+wants_to_attack(Mc,Agent) ; 
+entity Actress: character;  
+health(Actress) = 2.0 ; 
+altruism(Actress) = 21.0 ;
+ambition(Actress) = 3.0 ;
+satisfaction(Actress) = 1.0 ;
+has(Actress,Gold) = 0.0 ; 
+has(Actress,Fuel) = 0.0 ; 
+has(Actress,Meds) = 1.0 ; 
+knows_location(Actress,Meds) ; 
+has(Actress,Food) = 0.0 ; 
+has(Actress,Map) = 0.0 ; 
+likes(Actress,Mc) = 0.0 ; 
+likes(Actress,Coward) = -5.0 ; 
+wants_to_attack(Actress,Coward) ; 
+likes(Actress,Agent) = 0.0 ; 
 entity Coward: character;  
-health(Coward) = 1.0 ; 
+health(Coward) = 2.5 ; 
 altruism(Coward) = 6.0 ;
-ambition(Coward) = -1.0 ;
-satisfaction(Coward) = 0.0 ;
+ambition(Coward) = 1.0 ;
+satisfaction(Coward) = 4.5 ;
 has(Coward,Gold) = 0.0 ; 
-has(Coward,Fuel) = 0.0 ; 
+has(Coward,Fuel) = 3.0 ; 
 has(Coward,Meds) = 0.0 ; 
 has(Coward,Food) = 0.0 ; 
+has(Coward,Map) = 0.0 ; 
 likes(Coward,Mc) = 0.0 ; 
-wants_to_attack(Coward,Mc) ; 
-likes(Coward,Nagi) = -5.0 ; 
-wants_to_attack(Coward,Nagi) ; 
-likes(Coward,Actor) = -5.0 ; 
-wants_to_attack(Coward,Actor) ; 
+likes(Coward,Actress) = 0.0 ; 
+wants_to_attack(Coward,Actress) ; 
+likes(Coward,Agent) = 4.0 ; 
+entity Agent: character;  
+health(Agent) = 2.5 ; 
+altruism(Agent) = -20.0 ;
+ambition(Agent) = 4.0 ;
+satisfaction(Agent) = 12.875 ;
+has(Agent,Gold) = 1.0 ; 
+has(Agent,Fuel) = 0.0 ; 
+has(Agent,Meds) = 0.0 ; 
+has(Agent,Food) = 2.0 ; 
+has(Agent,Map) = 0.0 ; 
+likes(Agent,Mc) = 0.0 ; 
+likes(Agent,Actress) = 0.0 ; 
+wants_to_attack(Agent,Actress) ; 
+likes(Agent,Coward) = 0.0 ; 
 
 											////////////////////////////////////////actions
 
@@ -476,28 +482,18 @@ wants_to_attack(Coward,Actor) ;
 				health(char) = 3;  // Beliefs can be updated explicitly.
 		};
 
-			utility(): 
+utility(): 
  if(health(Coward)<2) 0
 								else 
- 							(if (knows_location(Coward,Fuel)) 1 else 0 ) + (if (has(Coward,Fuel) > 0 ) 1 else 0 ) + (if(exists(c : character) (wants_to_attack(Coward,c) & health(c)<2)) 1  else 0)
+ 							(if (knows_location(Coward,Fuel)) 1 else 0 ) + (if (has(Coward,Fuel) > 3 ) 1 else 0 ) + (if(exists(c : character) (wants_to_attack(Coward,c) & health(c)<2)) 1  else 0)
 							; 
-utility(Nagi): 
-  if(health(Nagi)<2) 0
+utility(Actress): 
+  if(health(Actress)<2) 0
  								elseif
-								((exists(c : character) (wants_to_attack(Nagi,c) & health(c)>2)))
+								((exists(c : character) (wants_to_attack(Actress,c) & health(c)>2)))
 									0
 									else
-										(if(has(Nagi,Gold) > 3  ) satisfaction(Nagi) else 0)
-									
-									  ; 
-
-utility(Actor): 
-  if(health(Actor)<2) 0
- 								elseif
-								((exists(c : character) (wants_to_attack(Actor,c) & health(c)>2)))
-									0
-									else
-										(if(has(Actor,Fuel) > 3  ) satisfaction(Actor) else 0)
+										(if(has(Actress,Meds) > 1  ) satisfaction(Actress) else 0)
 									
 									  ; 
 
@@ -507,7 +503,17 @@ utility(Coward):
 								((exists(c : character) (wants_to_attack(Coward,c) & health(c)>2)))
 									0
 									else
-										(if(has(Coward,Fuel) > 0  ) satisfaction(Coward) else 0)
+										(if(has(Coward,Fuel) > 3  ) satisfaction(Coward) else 0)
+									
+									  ; 
+
+utility(Agent): 
+  if(health(Agent)<2) 0
+ 								elseif
+								((exists(c : character) (wants_to_attack(Agent,c) & health(c)>2)))
+									0
+									else
+										(if(has(Agent,Food) > 2  ) satisfaction(Agent) else 0)
 									
 									  ; 
 

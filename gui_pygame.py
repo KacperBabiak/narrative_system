@@ -41,7 +41,8 @@ class GameGUI:
         characters = self.planner.characters.copy()
         characters.remove('Mc')
         self.character_dropdown = pygame_gui.elements.UIDropDownMenu(characters, relative_rect=pygame.Rect((250,475), (OPTION_DROPDOWN_WIDTH, OPTION_DROPDOWN_HEIGHT)), starting_option=characters[0], manager=self.manager)
-        items = ["Food","Gold","Fuel","Meds"]
+        #items = ["Food","Gold","Fuel","Meds"]
+        items = self.planner.items
         self.item_dropdown = pygame_gui.elements.UIDropDownMenu(items, relative_rect=pygame.Rect((450, 475), (OPTION_DROPDOWN_WIDTH, OPTION_DROPDOWN_HEIGHT)), starting_option=items[0], manager=self.manager)
 
         #main loop

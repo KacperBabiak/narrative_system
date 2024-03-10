@@ -17,7 +17,7 @@ class Main_Loop:
     def give_goal(self):
         
         characters = list(self.world_state.index.drop('World'))
-        items = ['Fuel', 'Gold', 'Food', 'Meds']
+        items = ['Fuel', 'Gold', 'Food', 'Meds','Map']
 
         #zdobycie surowca
 
