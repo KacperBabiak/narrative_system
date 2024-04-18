@@ -18,21 +18,21 @@ property ambition(char: character) : number;
 property likes(char: character, char2: character) : number;
 property wants_to_attack(character : character, char2: character) : boolean;
 property quantity(item : item) : number;entity Gold: item;  
-quantity( Gold) = 5;  
+quantity( Gold) = 0;  
 entity Fuel: item;  
-quantity( Fuel) = 5;  
+quantity( Fuel) = 0;  
 entity Meds: item;  
-quantity( Meds) = 5;  
+quantity( Meds) = 0;  
 entity Food: item;  
-quantity( Food) = 5;  
+quantity( Food) = 0;  
 entity Actress: character;  
 health(Actress) = 1.0 ; 
-altruism(Actress) = 21.0 ;
+altruism(Actress) = -21.0 ;
 ambition(Actress) = 3.0 ;
 satisfaction(Actress) = 1.0 ;
 has(Actress,Gold) = 0.0 ; 
 has(Actress,Fuel) = 0.0 ; 
-has(Actress,Meds) = 1.0 ; 
+has(Actress,Meds) = 0.0 ; 
 //knows_location(Actress,Meds) ; 
 has(Actress,Food) = 0.0 ; 
 likes(Actress,Actor) = -5.0 ; 
@@ -46,7 +46,7 @@ ambition(Actor) = 5.0 ;
 satisfaction(Actor) = 5.25 ;
 has(Actor,Gold) = 2.0 ; 
 has(Actor,Fuel) = 3.0 ; 
-has(Actor,Meds) = 0.0 ; 
+has(Actor,Meds) = 1.0 ; 
 has(Actor,Food) = 0.0 ; 
 likes(Actor,Actress) = 0.0 ; 
 likes(Actor,Agent) = 0.0 ; 
@@ -85,6 +85,7 @@ wants_to_attack(Mc,Agent) ;
 							!knows_location(char,item)
 							&health(char) > 0
 		   					&char != Mc
+							&quantity(item) != 0
 							;
 
 							effect:

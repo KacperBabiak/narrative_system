@@ -1,5 +1,6 @@
 /////////////////////////////////////types
 
+
 type character;
 type item ;
 
@@ -17,72 +18,67 @@ property ambition(char: character) : number;
 property likes(char: character, char2: character) : number;
 property wants_to_attack(character : character, char2: character) : boolean;
 property quantity(item : item) : number;entity Gold: item;  
-quantity( Gold) = 5;  
+quantity( Gold) = 5.0;  
 entity Fuel: item;  
-quantity( Fuel) = 5;  
+quantity( Fuel) = 5.0;  
 entity Meds: item;  
-quantity( Meds) = 5;  
+quantity( Meds) = 5.0;  
 entity Food: item;  
-quantity( Food) = 5;  
+quantity( Food) = 5.0;  
 entity Map: item;  
-quantity( Map) = 3;  
+quantity( Map) = 3.0;  
 entity Mc: character;  
-health(Mc) = 2.0 ; 
+health(Mc) = 3.0 ; 
 altruism(Mc) = 0.0 ;
-ambition(Mc) = 9.0 ;
+ambition(Mc) = 12.0 ;
 satisfaction(Mc) = 0.0 ;
 has(Mc,Gold) = 1.0 ; 
 has(Mc,Fuel) = 1.0 ; 
 has(Mc,Meds) = 0.0 ; 
-has(Mc,Food) = 0.0 ; 
+has(Mc,Food) = 1.0 ; 
 has(Mc,Map) = 0.0 ; 
+likes(Mc,Actor) = 0.0 ; 
 likes(Mc,Actress) = 0.0 ; 
-likes(Mc,Coward) = 0.0 ; 
-likes(Mc,Agent) = -5.0 ; 
-wants_to_attack(Mc,Agent) ; 
+likes(Mc,Agent) = 0.0 ; 
+entity Actor: character;  
+health(Actor) = 3.0 ; 
+altruism(Actor) = -1.0 ;
+ambition(Actor) = 7.0 ;
+satisfaction(Actor) = 0.0 ;
+has(Actor,Gold) = 2.0 ; 
+has(Actor,Fuel) = 1.0 ; 
+has(Actor,Meds) = 0.0 ; 
+has(Actor,Food) = 1.0 ; 
+has(Actor,Map) = 0.0 ; 
+likes(Actor,Mc) = 0.0 ; 
+likes(Actor,Actress) = 0.0 ; 
+likes(Actor,Agent) = 0.0 ; 
 entity Actress: character;  
-health(Actress) = 2.0 ; 
+health(Actress) = 3.0 ; 
 altruism(Actress) = 21.0 ;
-ambition(Actress) = 3.0 ;
-satisfaction(Actress) = 1.0 ;
+ambition(Actress) = 6.0 ;
+satisfaction(Actress) = 0.0 ;
 has(Actress,Gold) = 0.0 ; 
-has(Actress,Fuel) = 0.0 ; 
+has(Actress,Fuel) = 1.0 ; 
 has(Actress,Meds) = 1.0 ; 
-knows_location(Actress,Meds) ; 
 has(Actress,Food) = 0.0 ; 
 has(Actress,Map) = 0.0 ; 
 likes(Actress,Mc) = 0.0 ; 
-likes(Actress,Coward) = -5.0 ; 
-wants_to_attack(Actress,Coward) ; 
+likes(Actress,Actor) = 0.0 ; 
 likes(Actress,Agent) = 0.0 ; 
-entity Coward: character;  
-health(Coward) = 2.5 ; 
-altruism(Coward) = 6.0 ;
-ambition(Coward) = 1.0 ;
-satisfaction(Coward) = 4.5 ;
-has(Coward,Gold) = 0.0 ; 
-has(Coward,Fuel) = 3.0 ; 
-has(Coward,Meds) = 0.0 ; 
-has(Coward,Food) = 0.0 ; 
-has(Coward,Map) = 0.0 ; 
-likes(Coward,Mc) = 0.0 ; 
-likes(Coward,Actress) = 0.0 ; 
-wants_to_attack(Coward,Actress) ; 
-likes(Coward,Agent) = 4.0 ; 
 entity Agent: character;  
-health(Agent) = 2.5 ; 
-altruism(Agent) = -20.0 ;
-ambition(Agent) = 4.0 ;
-satisfaction(Agent) = 12.875 ;
-has(Agent,Gold) = 1.0 ; 
-has(Agent,Fuel) = 0.0 ; 
+health(Agent) = 3.0 ; 
+altruism(Agent) = -21.0 ;
+ambition(Agent) = 6.0 ;
+satisfaction(Agent) = 0.0 ;
+has(Agent,Gold) = 0.0 ; 
+has(Agent,Fuel) = 1.0 ; 
 has(Agent,Meds) = 0.0 ; 
-has(Agent,Food) = 2.0 ; 
+has(Agent,Food) = 1.0 ; 
 has(Agent,Map) = 0.0 ; 
 likes(Agent,Mc) = 0.0 ; 
+likes(Agent,Actor) = 0.0 ; 
 likes(Agent,Actress) = 0.0 ; 
-wants_to_attack(Agent,Actress) ; 
-likes(Agent,Coward) = 0.0 ; 
 
 											////////////////////////////////////////actions
 
@@ -482,28 +478,28 @@ likes(Agent,Coward) = 0.0 ;
 				health(char) = 3;  // Beliefs can be updated explicitly.
 		};
 
-utility(): 
- if(health(Coward)<2) 0
+			utility(): 
+ if(health(Actress)<2) 0
 								else 
- 							(if (knows_location(Coward,Fuel)) 1 else 0 ) + (if (has(Coward,Fuel) > 3 ) 1 else 0 ) + (if(exists(c : character) (wants_to_attack(Coward,c) & health(c)<2)) 1  else 0)
+ 							(if (knows_location(Actress,Meds)) 1 else 0 ) + (if (has(Actress,Meds) > 1.0 ) 1 else 0 ) + (if(exists(c : character) (wants_to_attack(Actress,c) & health(c)<2)) 1  else 0)
 							; 
+utility(Actor): 
+  if(health(Actor)<2) 0
+ 								elseif
+								((exists(c : character) (wants_to_attack(Actor,c) & health(c)>2)))
+									0
+									else
+										(if(has(Actor,Fuel) > 1.0  ) satisfaction(Actor) else 0)
+									
+									  ; 
+
 utility(Actress): 
   if(health(Actress)<2) 0
  								elseif
 								((exists(c : character) (wants_to_attack(Actress,c) & health(c)>2)))
 									0
 									else
-										(if(has(Actress,Meds) > 1  ) satisfaction(Actress) else 0)
-									
-									  ; 
-
-utility(Coward): 
-  if(health(Coward)<2) 0
- 								elseif
-								((exists(c : character) (wants_to_attack(Coward,c) & health(c)>2)))
-									0
-									else
-										(if(has(Coward,Fuel) > 3  ) satisfaction(Coward) else 0)
+										(if(has(Actress,Meds) > 1.0  ) satisfaction(Actress) else 0)
 									
 									  ; 
 
@@ -513,7 +509,7 @@ utility(Agent):
 								((exists(c : character) (wants_to_attack(Agent,c) & health(c)>2)))
 									0
 									else
-										(if(has(Agent,Food) > 2  ) satisfaction(Agent) else 0)
+										(if(has(Agent,Meds) > 0.0  ) satisfaction(Agent) else 0)
 									
 									  ; 
 

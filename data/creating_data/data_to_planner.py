@@ -1,0 +1,344 @@
+from subprocess import Popen, PIPE, STDOUT
+import pandas as pd
+
+def load_action(file):
+
+		
+		p = Popen(['java', '-jar', 'lib\sabre.jar', '-p', file,'-el',"1","-tl","5000"], stdout=PIPE, stderr=STDOUT)
+		#p = Popen(['java', '-jar', 'lib\sabre.jar', '-p', file,'-el',"0",'-g',"","-tl","1000"], stdout=PIPE, stderr=STDOUT)
+
+		lines=[]
+		for line in p.stdout:
+			lines.append(str(line, encoding='utf-8'))
+
+		#print(lines)
+		return lines 
+
+
+
+def create_file(characters,items,row):
+		with open("lib/island_new.txt", 'w') as f:
+			f.write("""/////////////////////////////////////types
+
+
+type character;
+type item ;
+
+
+//////////////////////////////////property
+
+
+//character
+
+
+property health(char: character) : number;
+property satisfaction(char: character) : number;
+
+property altruism(char: character) : number;
+property ambition(char: character) : number;
+
+property likes(char: character, other: character) : number;
+property wants_to_help(character : character, other: character) : boolean;
+property wants_to_attack(character : character, other: character) : boolean;
+property wants_item(character : character, item: item) : boolean;
+property wants_to_meet(character : character, other: character) : boolean;
+property wants_to_give(character : character,character2 : character, item: item) : boolean;
+property was_attacked(character : character) : boolean;
+property meeting(character : character, other: character) : boolean;
+property vulnerable(character : character) : boolean;
+property know_location(char:character,item:item) : boolean; 
+
+
+property has_item(char : character, item:item) : boolean;
+property quantity( item:item) : number;
+		   
+		   entity mc : character;
+		   """
+			)
+			for item in items:
+				f.write("entity "+ item  + ": item;  \n")
+				f.write("quantity("+ item  + ") = " + str(row[item+"_quantity"]) + " ;  \n") 
+
+				#warrtosci postaci
+			for char in characters:
+			
+				f.write("entity "+ char + ": character;  \n")
+				f.write("altruism(" + char  +") = " + str(row[char+"_altruism"]) + " ;\n")
+				
+				char_without_c = characters.copy()
+				char_without_c.remove(char)
+				for c2 in char_without_c:
+					f.write("likes(" + char  +", "+ c2 +") = " + str(row[char+"_likes_"+c2]) + " ;\n")
+				   
+				
+				for i in items:
+					if row[char+"_likes_"+c2] == 1:
+						f.write("has_item(" + char  +", "+ i +")   ;\n")
+				   
+			
+
+				
+
+				
+
+			f.write("""action find(char : character,item : item) {
+	precondition:
+		quantity(item) > 0
+		
+		;
+		
+
+	effect:
+	
+	know_location(char,item) 
+	&quantity(item) = quantity(item) - 1
+	
+	;
+	consenting: char;
+	
+};
+
+
+
+action exchange_item(char : character, other: character, item1: item, item2 : item) {
+		precondition:
+			char != other
+			&char != mc
+			&item1 != item2
+			&has_item(char,item1)
+			&!has_item(other,item1)
+			&!has_item(char,item2)
+			&has_item(other,item2)
+			//&meeting(char,other)
+			
+			;
+
+		effect:
+			
+			wants_to_give(char,other,item1)
+			&wants_to_give(other,char,item2)
+			
+			;
+		consenting: char,other;
+		
+	};
+
+action give_item(char : character, other: character, item: item) {
+		precondition:
+			char != other
+			&char != mc
+			&has_item(char,item)
+			&!has_item(other,item)
+			//&meeting(char,other)
+			
+			;
+
+		effect:
+			
+			wants_to_help(other,char) 
+			&wants_to_give(char,other,item)
+
+			& likes(other,char) = likes(other,char) + 1
+			;
+		consenting: char,other;
+		
+	};
+
+
+action prepare_duel(char : character, other: character) {
+		precondition:
+			char != other
+			&char != mc
+			&wants_to_attack(other,char) 
+			
+			;
+
+		effect:
+			
+			vulnerable(other)
+			
+			;
+		consenting: char;
+		
+	};
+
+
+
+
+action prepare_ally(char : character, other: character, attacked : character) {
+		precondition:
+			char != other
+			&attacked != other
+			& attacked != char
+			&char != mc
+			&wants_to_attack(char,attacked)
+			&(wants_to_attack(other,attacked) | wants_to_help(other,char)  | likes(other, char) == 2 | wants_to_attack(attacked,other)) 
+			;
+
+		effect:
+			
+			vulnerable(attacked)
+			&wants_to_attack(other,attacked)
+			//&wants_to_attack(char,attacked)
+			& likes(char,other) = likes(char,other) + 1
+			;
+		consenting: char, other;
+		
+	};
+
+
+action attack(char : character, other: character) {
+		precondition:
+			char != other
+			&char != mc
+			&vulnerable(other)  
+			//&meeting(char,other)
+			
+			;
+
+		effect:
+			!vulnerable(other)  
+			&was_attacked(other)
+			&if(wants_to_attack(char,other) | (altruism(char) + likes(other,char) < 0))  satisfaction(char) = satisfaction(char) + 1
+			&if( (altruism(char) + likes(other,char) > 3))  satisfaction(char) = satisfaction(char) - 1
+			;
+		consenting: char;
+		
+	};
+
+action get_item(char : character, other: character, item : item) {
+		precondition:
+			char != other
+			&char != mc
+		   & ((has_item(other,item) & (was_attacked(other) | wants_to_give(other,char,item)) )
+			| know_location(char,item) 
+		   )
+			//| ambition(char) > 2
+			//&meeting(char,other)
+			&!has_item(char,item)
+			
+			//&!vulnerable(char)
+			;
+
+		effect:
+			has_item(char,item)
+			&!has_item(other,item)
+			& if(!has_item(char,item)) satisfaction(char) = satisfaction(char) + 1
+			& if(vulnerable(other)) satisfaction(char) = satisfaction(char) - 1
+			;
+		consenting: char;
+		
+	};
+
+action prepare_deal(char : character, other: character, item: item) {
+		precondition:
+			char != other
+			&char != mc
+			&has_item(char,item)
+			&!has_item(other,item)
+			//&meeting(char,other)
+			
+			;
+
+		effect:
+			meeting(char,other)
+			&meeting(other,char)
+			//vulnerable(other)
+			&wants_to_give(char,other,item)
+			;
+		consenting: char,other;
+		
+	};
+
+action prepare_meeting(char : character, other: character) {
+		precondition:
+			char != other
+			&char != mc
+			&!meeting(char,other)
+			&!meeting(other,char)
+			;
+
+		effect:
+			
+			meeting(char,other)
+			&meeting(other,char)
+			& likes(other,char) = likes(other,char) + 1
+			& if((altruism(other) + likes(char,other)>2) | wants_to_meet(other,char)) satisfaction(other) = satisfaction(other) + 1
+			;
+		consenting: char,other;
+		
+	};
+
+action prepare_trap(char : character, other: character, meeted : character) {
+		precondition:
+			//char != other
+			char != mc
+			& char != meeted
+			&meeting(other,meeted)
+			;
+
+		effect:
+			
+			vulnerable(other)
+			
+			;
+		consenting: char;
+		
+	};
+
+
+
+action take_care_of(char : character, other: character) {
+		precondition:
+			
+			char != mc
+			
+			//&vulnerable(other)
+			&was_attacked(other)
+			;
+
+		effect:
+			
+			!was_attacked(other)
+			//&meeting(char,other)
+			//&meeting(other,char)
+			& if(((altruism(other) + likes(char,other)>2) | wants_to_meet(other,char)) & char != other) satisfaction(char) = satisfaction(char) + 1
+			;
+		consenting: char;
+		
+	};
+			""")
+
+			
+			acting_char = row['active']
+			f.write("utility(): \n ")
+			f.write("satisfaction({}) ;\n".format(acting_char))
+
+			
+		
+
+
+			for char in characters:
+				f.write("utility({}): \n ".format(char))
+				f.write("satisfaction({}); \n ".format(char))
+			
+			
+			f.close()
+
+characters = ['doctor', 'soldier', 'actor']
+items = ['food', 'meds']
+file = 'lib/island_new.txt'
+
+df = pd.read_csv('data\all_states_balanced.csv')
+
+for index in range(1252,len(df)):
+	row=df.loc[index]
+	create_file(characters, items, row)
+
+	action = load_action(file)
+	print(index)
+	df.loc[index,['results']] = action
+	df.to_csv('data/all_states_results_balanced.csv')
+	
+
+print(df)

@@ -1,0 +1,283 @@
+/////////////////////////////////////types
+
+
+type character;
+type item ;
+type place;
+
+//////////////////////////////////property
+
+
+//character
+
+property health(char: character) : number;
+property satisfaction(char: character) : number;
+property has(character : character, item:item) : number;
+property char_at( char:character) : place;
+property item_at( item:item) : place;
+property knows_location(character : character, item:item) : boolean;
+//property knows_has(character : character, item:item) : boolean;
+//property knows_at(character : character, item:item) : boolean;
+property altruism(char: character) : number;
+property ambition(char: character) : number;
+property likes(char: character, other: character) : number;
+property wants_to_attack(character : character, other: character) : boolean;
+property quantity(item : item) : number;
+property made_trap(character : character) : character;
+property escaped(character : character) : boolean;
+///////////////////////////////////entity
+
+entity pl1 :place;
+entity pl2 :place;
+entity pl3 :place;
+
+entity mc : character;
+
+
+
+
+entity soldier : character;
+altruism(soldier) = -1;
+health(soldier) = 5;
+ambition(soldier) = 3;
+knows_location(soldier, food); 
+has(soldier,food) = 1;
+likes(soldier,doctor) = -1;
+char_at(soldier) = pl2;
+
+entity doctor : character;
+health(doctor) = 5;
+ambition(doctor) = 2;
+//wants_to_attack(doctor,soldier);
+//has(doctor,weapon) = 1;
+//has(doctor,food) = 0;
+altruism(doctor) = 2;
+//ambition(doctor) = 3;
+likes(doctor,soldier) = 0;
+char_at(doctor) = pl1;
+
+//satisfaction(doctor) = 0;
+
+entity debil : character;
+health(debil) = 5;
+ambition(debil) = 6;
+//wants_to_attack(debil,soldier);
+//has(debil,food) = 1;
+altruism(debil) = 1;
+//ambition(doctor) = 3;
+char_at(debil) = pl3;
+
+
+
+//has(doctor,food) = 2;
+
+entity item1: item;
+entity weapon : item;
+entity money : item;
+entity food : item;
+
+quantity(food) = 1;
+item_at(food) = pl1;
+
+entity meds : item;
+
+
+////////////////////////////////////////actions
+action travel_to(char : character,  place:place) {
+	precondition:
+	health(char) > 0
+	&!escaped(char)
+	;
+
+	effect:
+    char_at(char) = place
+	;
+	consenting: char;
+	
+};
+
+
+action escape(char : character) {
+	precondition:
+	health(char) > 0
+	&!escaped(char)
+	;
+
+	effect:
+    escaped(char)
+	;
+	consenting: char;
+	
+};
+
+/*
+action search_for(char : character, item:item, place : place) {
+	precondition:
+    
+	health(char) > 0
+
+	&!escaped(char)
+	&quantity(item)>0
+	&item_at(item) == place
+	;
+
+	effect:
+    knows_location(char, item)
+    &  satisfaction(char) = satisfaction(char) + 1
+    & health(char) = health(char) - 3 
+    
+	;
+	consenting: char;
+	
+};
+*/
+
+action ask_for_location(char : character,other : character, item:item,place:place) {
+	precondition:
+    char != other
+	&knows_location(other, item)
+    &quantity(item) > 0
+	&health(char) > 0
+	&health(other) > 0
+	&!escaped(char)
+	&!escaped(other)
+	&char_at(char)==place
+	&char_at(other)==place
+	;
+
+	effect:
+    knows_location(char, item)
+    &  satisfaction(char) = satisfaction(char) + altruism(char) + (likes(char,other))
+    &  satisfaction(other) = satisfaction(other) +altruism(other) + (likes(other,char))
+    &altruism(char) = altruism(char) + 0.5
+    &likes(char,other) = likes(char,other) + 0.5
+	;
+	consenting: char,other;
+	
+};
+
+
+
+action attack_for_location(char : character,other: character, item:item, place:place) {
+	precondition:
+    char != other
+	&knows_location(other, item)
+    &quantity(item) > 0
+	&health(char) > 0
+	&health(other) > 0
+	&!escaped(char)
+	&char_at(char)==place
+	&char_at(other)==place
+	;
+
+	effect:
+    knows_location(char, item)
+    & satisfaction(char) = satisfaction(char) - (altruism(char) + likes(char,other))
+    & satisfaction(other) = satisfaction(char)  - 1 
+    &wants_to_attack(other,char)
+    &health(char) = health(char) - 0.5
+    &health(other) = health(other) - 1
+	&ambition(other) = ambition(other) - 1
+    &likes(other,char) = likes(other,char) - 3
+	;
+	consenting: char;
+	
+};
+
+
+
+//oszukaj z lokacja
+action pay_for_location(char : character,other : character, item:item, ex_item:item, place:place) {
+	precondition:
+    char != other
+    &!knows_location(char,item)
+    &knows_location(other,item)
+    &has(char,ex_item)>0
+    //&quantity(item) > 0
+	&health(char) > 0
+	&health(other) > 0
+	&!escaped(char)
+	&!escaped(other)
+	&char_at(char)==place
+	&char_at(other)==place
+	;
+
+	effect:
+    knows_location(char,item)
+    & has(char,ex_item) = has(char,ex_item) - 1
+    & has(other,ex_item) = has(other,ex_item) +1
+
+    &  satisfaction(char) = satisfaction(char)  + 5
+    &  satisfaction(other) = satisfaction(other)  + 5
+
+    &likes(other,char) = likes(other,char) + 1
+    &likes(char,other) = likes(char,other) + 1
+	;
+	consenting: char,other;
+	
+};
+//////////////////utility
+
+utility():
+//(if (knows_location(doctor,food)  ) 1 else 0 ) +
+(if (has(doctor,food) >0 ) 1 else 0 ) + (if (escaped(doctor) ) 1 else 0 ) 
+//+ (if(exists(c : character) (wants_to_attack(doctor,c) & health(c)<2)) 1  else 0) 
+//+ satisfaction(doctor) 
+//(if(health(alko) > 0) 1 else 0)
+//satisfaction(doctor) 
+//wants_to_attack(soldier,doctor);
+//full(doctor)
+//wants_to_attack(doctor,soldier);
+//if (health(soldier)< 10) 1 else 0
+;
+
+
+
+
+utility(doctor):
+//(has(doctor,food) > 0);
+//if (knows_location(doctor,food)) 1 else 0;
+//if(health(alko) > 3) satisfaction(doctor) else 0;
+
+//if(exists(c : character) wants_to_attack(doctor,c)) 1 else 0;
+//(if(exists(c : character) (wants_to_attack(doctor,c) & health(c)<1)) 1  else 0)
+
+if(!escaped(doctor)) 0
+//if(health(doctor)<4) 0
+else 
+	(if (exists(c : character) (wants_to_attack(doctor,c) & health(c)>1))
+	0
+	else
+		//(if(has(doctor,food) > 0  ) satisfaction(doctor) else 0)
+		(if(knows_location(doctor, food)  ) satisfaction(doctor) else 0)
+	) 
+ 
+;
+
+//(if(health(soldier)<2 ) satisfaction(doctor) else 0);
+
+
+//satisfaction(doctor) ;
+//wants_to_attack(doctor,soldier);
+//health(soldier)<10;
+
+utility(debil):
+satisfaction(debil)
+ 
+;
+
+utility(soldier):
+//if(has(alko,weapon)>0) satisfaction(soldier) else 0;
+//(has(alko,weapon)) + satisfaction(soldier);
+
+	
+ 
+satisfaction(soldier) + (if(has(soldier,weapon) > 1  ) 1 else 0)
+
+	
+;
+
+
+
+
+

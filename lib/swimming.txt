@@ -18,32 +18,43 @@ property ambition(char: character) : number;
 property likes(char: character, char2: character) : number;
 property wants_to_attack(character : character, char2: character) : boolean;
 property quantity(item : item) : number;
+property made_trap(character : character) : character;
+property escaped(character : character) : boolean;
 ///////////////////////////////////entity
 
 
 entity mc : character;
 
-entity alko : character;
+
 
 //entity alko2 : character;
 //entity alko3 : character;
 
 entity soldier : character;
-altruism(soldier) = -15;
+altruism(soldier) = 15;
 health(soldier) = 3;
 ambition(soldier) = 3;
 //knows_location(soldier, food); 
-has(soldier,food) = 2;
+has(soldier,food) = 1;
 
 entity doctor : character;
-health(doctor) = 5;
-ambition(doctor) = -15;
+health(doctor) = 3;
+ambition(doctor) = 15;
 //wants_to_attack(doctor,soldier);
-has(doctor,weapon) = 1;
+has(doctor,food) = 0;
 altruism(doctor) = 15;
 //ambition(doctor) = 3;
-likes(doctor,soldier) = 0;
-satisfaction(doctor) = 1;
+likes(doctor,debil) = 20;
+satisfaction(doctor) = 0;
+
+entity debil : character;
+health(debil) = 5;
+ambition(debil) = 15;
+//wants_to_attack(debil,soldier);
+//has(doctor,weapon) = 1;
+altruism(debil) = 15;
+//ambition(doctor) = 3;
+
 
 
 //has(doctor,food) = 2;
@@ -52,25 +63,37 @@ entity item1: item;
 entity weapon : item;
 entity money : item;
 entity food : item;
-quantity(food) = 2;
+quantity(food) = 0;
 
 
 entity meds : item;
 
 
 ////////////////////////////////////////actions
+action escape(char : character) {
+	precondition:
+	health(char) > 0
+	&!escaped(char)
+	;
 
+	effect:
+    escaped(char)
+	;
+	consenting: char;
+	
+};
 
 action search_for(char : character, item:item) {
 	precondition:
     !knows_location(char,item)
 	&health(char) > 0
+	&!escaped(char)
 	;
 
 	effect:
     knows_location(char,item)
     &  satisfaction(char) = satisfaction(char) + 1
-    & health(char) = health(char) - 1 
+    & health(char) = health(char) - 3 
     
 	;
 	consenting: char;
@@ -85,6 +108,7 @@ action ask_for_location(char : character,char2 : character, item:item) {
     &quantity(item) > 0
 	&health(char) > 0
 	&health(char2) > 0
+	&!escaped(char)
 	;
 
 	effect:
@@ -94,7 +118,7 @@ action ask_for_location(char : character,char2 : character, item:item) {
     &altruism(char) = altruism(char) + 2
     &likes(char,char2) = likes(char,char2) + 2
 	;
-	consenting: char;
+	consenting: char,char2;
 	
 };
 
@@ -108,6 +132,7 @@ action pay_for_location(char : character,char2 : character, item:item, ex_item:i
     &quantity(item) > 0
 	&health(char) > 0
 	&health(char2) > 0
+	&!escaped(char)
 	;
 
 	effect:
@@ -133,6 +158,7 @@ action attack_for_location(char : character,char2 : character, item:item) {
     &quantity(item) > 0
 	&health(char) > 0
 	&health(char2) > 0
+	&!escaped(char)
 	;
 
 	effect:
@@ -155,6 +181,7 @@ action find(char : character,item : item) {
 		knows_location(char,item)
         &quantity(item) > 0
 		&health(char) > 0
+		&!escaped(char)
 		;
         
 
@@ -175,6 +202,7 @@ action ask_for_item(char : character, other: character, item : item) {
 			&has(other, item) > 0
 			&health(char) > 0
 			&health(other) > 0
+			&!escaped(char)
 			;
 
 		effect:
@@ -195,7 +223,7 @@ action take_item(char : character, other: character, item : item) {
 			&has(other, item) > 0
 			&health(char) > 0
 			&health(other) > 0
-			
+			&!escaped(char)
 			;
 
 		effect:
@@ -206,7 +234,7 @@ action take_item(char : character, other: character, item : item) {
 			&wants_to_attack(other,char)
             &satisfaction(char) = satisfaction(char) + (  likes(char,other)/ -4) + ( altruism(char)/ -4) 
 			&health(char) = health(char) - 0.5
-    		&health(other) = health(other) - 1
+    		&health(other) = health(other) - 0.5
 			&ambition(other) = ambition(other) - 1
     		&likes(other,char) = likes(other,char) - 5
 			;
@@ -223,6 +251,7 @@ action exchange_item(char : character, other: character, item1 : item, item2 :it
 			&has(other, item2) >0
 			&health(char) > 0
 			&health(other) > 0
+			&!escaped(char)
 			;
 
 		effect:
@@ -248,6 +277,7 @@ action give_item(char : character, other: character, item : item) {
 			&has(char, item) > 0
 			&health(char) > 0
 			&health(other) > 0
+			&!escaped(char)
 			;
 
 		effect:
@@ -269,6 +299,7 @@ action use_meds(char : character) {
 	precondition:
 		has(char,meds) > 0
 		&health(char) > 0
+		&!escaped(char)
 		;
         
 
@@ -280,12 +311,12 @@ action use_meds(char : character) {
 	
 };
 
-
 action rest(char : character) {
 		precondition:
 			
 			health(char) > 0
 			&char != mc
+			&!escaped(char)
 			;
 
 		effect:
@@ -328,7 +359,39 @@ action compliment(char : character, other: character) {
 		consenting: char;
 		
 	};
+
+
+
 */
+
+action trap(char : character, other: character) {
+		precondition:
+			char != other
+			&made_trap(char) == ? 
+			&char != mc
+            &wants_to_attack(char,other)
+			&!escaped(char)
+			&health(char) > 0
+			&health(other) > 0
+			;
+
+		effect:
+			
+			altruism(char) = altruism(char) -  4	
+            &satisfaction(char) = satisfaction(char) + (altruism(char)/7) + (likes(char,other)/7) 
+
+			&health(char) = health(char) + 0.5
+			//&health(other) = health(other) - 1
+			&ambition(other) = ambition(other) - 1
+			&altruism(other) = altruism(other) - 4
+			&likes(other,char) =likes(other,char) - 4
+			
+			&made_trap(char) = other
+			
+			;
+		consenting: char;
+		
+	};
 
 action attack(char : character, other: character) {
 		precondition:
@@ -339,8 +402,10 @@ action attack(char : character, other: character) {
 			//&ambition(char) > 13
 			&char != mc
             &wants_to_attack(char,other)
+			//&made_trap(char) == other
 			&health(char) > 0
 			&health(other) > 0
+			&!escaped(char)
 			;
 
 		effect:
@@ -348,8 +413,15 @@ action attack(char : character, other: character) {
 			altruism(char) = altruism(char) -  4	
             &satisfaction(char) = satisfaction(char) + (altruism(char)/7) + (likes(char,other)/7)
 
-			&health(char) = health(char) - 0.5
-			&health(other) = health(other) - 1
+			&if(made_trap(char)==other)(
+				
+				health(other) = health(other) - 0.75
+			)
+			else(
+				health(char) = health(char) - 0.5
+				&health(other) = health(other) - 1
+			)
+			
 			&ambition(other) = ambition(other) - 1
 			&altruism(other) = altruism(other) - 4
 			&likes(other,char) =likes(other,char) - 4
@@ -360,24 +432,56 @@ action attack(char : character, other: character) {
 		
 	};
 
+
 action ask_for_help(char : character, other: character, attacked : character) {
+		precondition:
+			char != other
+			&other != attacked
+			&health(other) > 0
+			&health(char) >0
+			&char != mc
+            &wants_to_attack(char,attacked)
+			&!escaped(char)
+			;
+
+		effect:
+			
+				
+            satisfaction(char) = satisfaction(char)  + (likes(char,other)/7) 
+			
+
+			
+			&altruism(other) = altruism(other) + 1
+			&wants_to_attack(other,attacked)
+			
+			
+			;
+		consenting: char;
+		
+	};
+
+
+action attack_together(char : character, other: character, attacked : character) {
 		precondition:
 			char != other
 			&health(other) > 0
 			&health(char) >0
 			&char != mc
             &wants_to_attack(char,attacked)
+			&wants_to_attack(other,attacked)
+			&!escaped(char)
 			;
 
 		effect:
 			
 				
             satisfaction(char) = satisfaction(char) + (altruism(char)/7) + (likes(char,other)/7)
-
-
 			
+
+			&health(attacked) = health(attacked) - 2
 			&altruism(other) = altruism(other) + 1
-			&wants_to_attack(other,attacked)
+			&wants_to_attack(attacked,char)
+			&wants_to_attack(attacked,other)
 			
 			
 			;
@@ -391,6 +495,7 @@ action spend_time_together(char : character, other: character) {
 			&char != mc
 			&health(char) >0
 			&health(other) >0
+			&!escaped(char)
 			;
 
 		effect:
@@ -417,20 +522,21 @@ action spend_time_together(char : character, other: character) {
 			&health(char) > 0
 			&health(other) > 0
 		   &char != mc
+		   &!escaped(char)
 			;
 
 		effect:
 			
-			
-			satisfaction(char) = (altruism(char)/7 * -1) - (likes(char,other)/7)
-			&altruism(char) = altruism(char) - 2
-			
-
-
-			&satisfaction(other) =-2 - (likes(other,char)/7) 
 		
-			&altruism(other) = altruism(other) - 3
-			&likes(other,char) =likes(other,char) -  4
+			satisfaction(char) = (altruism(char)/7 * -1) - (likes(char,other)/7)
+			//&altruism(char) = altruism(char) - 2
+			
+
+
+			//&satisfaction(other) =-2 - (likes(other,char)/7) 
+		
+			//&altruism(other) = altruism(other) - 3
+			//&likes(other,char) =likes(other,char) -  4
 			
 			
 			;
@@ -441,7 +547,9 @@ action spend_time_together(char : character, other: character) {
 //////////////////utility
 
 utility():
-(if (knows_location(doctor,food)) 1 else 0 ) + (if (has(doctor,food) >0 ) 1 else 0 ) + (if(exists(c : character) (wants_to_attack(doctor,c) & health(c)<2)) 1  else 0)
+//(if (knows_location(doctor,food)  ) 1 else 0 ) +
+(if (has(doctor,food) >0 ) 1 else 0 ) + (if (escaped(doctor) >0 ) 1 else 0 ) + (if(exists(c : character) (wants_to_attack(doctor,c) & health(c)<2)) 1  else 0) 
++ satisfaction(doctor) 
 //(if(health(alko) > 0) 1 else 0)
 //satisfaction(doctor) 
 //wants_to_attack(soldier,doctor);
@@ -461,17 +569,15 @@ utility(doctor):
 //if(exists(c : character) wants_to_attack(doctor,c)) 1 else 0;
 //(if(exists(c : character) (wants_to_attack(doctor,c) & health(c)<1)) 1  else 0)
 
-if(health(doctor)<4) 0
+if(!escaped(doctor)) 0
+//if(health(doctor)<4) 0
 else 
 	(if (exists(c : character) (wants_to_attack(doctor,c) & health(c)>1))
 	0
 	else
-		(if(has(doctor,food) > 0  ) satisfaction(doctor) else 0)
+		(if(has(doctor,food) > 0 & escaped(doctor) ) satisfaction(doctor) else 0)
 	) 
  
-
-
-	
 ;
 
 //(if(health(soldier)<2 ) satisfaction(doctor) else 0);
@@ -481,8 +587,16 @@ else
 //wants_to_attack(doctor,soldier);
 //health(soldier)<10;
 
-utility(alko):
-(has(alko,item1) > 0);
+utility(debil):
+if(health(debil)<4) 0
+else 
+	(if (exists(c : character) (wants_to_attack(debil,c) & health(c)>1))
+	0
+	else
+		(if(has(debil,food) > 0  ) satisfaction(debil) else 0)
+	) 
+ 
+;
 
 utility(soldier):
 //if(has(alko,weapon)>0) satisfaction(soldier) else 0;
