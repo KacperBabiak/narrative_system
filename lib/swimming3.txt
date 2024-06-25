@@ -138,7 +138,7 @@ action give_item(char : character, other: character, item: item) {
 		
 	};
 
-
+/*
 action prepare_duel(char : character, other: character) {
 		precondition:
 			char != other
@@ -155,7 +155,7 @@ action prepare_duel(char : character, other: character) {
 		consenting: char;
 		
 	};
-
+*/
 
 
 
@@ -185,7 +185,7 @@ action attack(char : character, other: character) {
 		precondition:
 			char != other
 			&char != mc
-			&vulnerable(other)  
+			&vulnerable(other)  | wants_to_attack(other,char)
 			//&meeting(char,other)
 			
 			;
@@ -204,11 +204,13 @@ action get_item(char : character, other: character, item : item) {
 		precondition:
 			char != other
 			&char != mc
-			&was_attacked(other) | wants_to_give(other,char,item) | know_location(char,item) 
+			& ((has_item(other,item) & (was_attacked(other) | wants_to_give(other,char,item)) )
+			| know_location(char,item) 
+		   )
 			//| ambition(char) > 2
 			//&meeting(char,other)
 			&!has_item(char,item)
-			&has_item(other,item)
+			
 			//&!vulnerable(char)
 			;
 

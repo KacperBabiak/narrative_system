@@ -1,0 +1,348 @@
+/////////////////////////////////////types
+
+
+type character;
+type item ;
+
+
+//////////////////////////////////property
+
+
+//character
+
+
+property health(char: character) : number;
+property satisfaction(char: character) : number;
+
+property altruism(char: character) : number;
+property ambition(char: character) : number;
+
+property likes(char: character, other: character) : number;
+property wants_to_help(character : character, other: character) : boolean;
+property wants_to_attack(character : character, other: character) : boolean;
+property wants_item(character : character, item: item) : boolean;
+property wants_to_meet(character : character, other: character) : boolean;
+property wants_to_give(character : character,character2 : character, item: item) : boolean;
+property was_attacked(character : character) : boolean;
+property meeting(character : character, other: character) : boolean;
+property vulnerable(character : character) : boolean;
+property know_location(char:character,item:item) : boolean; 
+
+
+property has_item(char : character, item:item) : boolean;
+property quantity( item:item) : number;
+///////////////////////////////////entity
+
+entity it : item;
+
+entity mc : character;
+
+
+
+quantity(it) = 0;
+
+entity soldier : character;
+altruism(soldier) = -1;
+health(soldier) = 5;
+ambition(soldier) = 3;
+//wants_to_attack(soldier,doctor);
+//wants_to_attack(soldier,actor);
+likes(soldier,doctor) = -1;
+//wants_item(actor,it);
+has_item(soldier,it);
+
+entity doctor : character;
+health(doctor) = 5;
+ambition(doctor) = 3;
+
+altruism(doctor) = 2;
+ambition(doctor) = 3;
+likes(doctor,soldier) = 0;
+//has_item(doctor,it);
+//wants_to_attack(doctor,soldier);
+//wants_to_attack(doctor,actor);
+//wants_item(doctor,it);
+
+//satisfaction(doctor) = 0;
+
+entity actor : character;
+health(actor) = 5;
+ambition(actor) = 6;
+//wants_to_attack(actor,soldier);
+//wants_to_attack(actor,doctor);
+likes(actor,doctor) = 1;
+altruism(actor) = -1;
+//has_item(actor,it);
+//ambition(doctor) = 3;
+
+action find(char : character,item : item) {
+	precondition:
+		quantity(item) > 0
+		
+		;
+        
+
+	effect:
+	
+	know_location(char,item) 
+    &quantity(item) = quantity(item) - 1
+    
+    ;
+	consenting: char;
+	
+};
+
+
+
+action exchange_item(char : character, other: character, item1: item, item2 : item) {
+		precondition:
+			char != other
+			&char != mc
+			&item1 != item2
+			&has_item(char,item1)
+			&!has_item(other,item1)
+			&!has_item(char,item2)
+			&has_item(other,item2)
+			//&meeting(char,other)
+			
+			;
+
+		effect:
+			
+			wants_to_give(char,other,item1)
+			&wants_to_give(other,char,item2)
+			
+			;
+		consenting: char,other;
+		
+	};
+
+action give_item(char : character, other: character, item: item) {
+		precondition:
+			char != other
+			&char != mc
+			&has_item(char,item)
+			&!has_item(other,item)
+			//&meeting(char,other)
+			
+			;
+
+		effect:
+			
+			wants_to_help(other,char) 
+			&wants_to_give(char,other,item)
+
+			& likes(other,char) = likes(other,char) + 1
+			;
+		consenting: char,other;
+		
+	};
+
+/*
+action prepare_duel(char : character, other: character) {
+		precondition:
+			char != other
+			&char != mc
+			&wants_to_attack(other,char) 
+			
+			;
+
+		effect:
+			
+			vulnerable(other)
+			
+			;
+		consenting: char;
+		
+	};
+*/
+
+
+
+action prepare_ally(char : character, other: character, attacked : character) {
+		precondition:
+			char != other
+			&attacked != other
+			& attacked != char
+			&char != mc
+			&wants_to_attack(char,attacked)
+			&(wants_to_attack(other,attacked) | wants_to_help(other,char)  | likes(other, char) == 2 | wants_to_attack(attacked,other)) 
+			;
+
+		effect:
+			
+			vulnerable(attacked)
+			&wants_to_attack(other,attacked)
+			//&wants_to_attack(char,attacked)
+			& likes(char,other) = likes(char,other) + 1
+			;
+		consenting: char, other;
+		
+	};
+
+
+action attack(char : character, other: character) {
+		precondition:
+			char != other
+			&char != mc
+			&vulnerable(other)  | wants_to_attack(other,char)
+			//&meeting(char,other)
+			
+			;
+
+		effect:
+			!vulnerable(other)  
+			&was_attacked(other)
+			&if(wants_to_attack(char,other) | (altruism(char) + likes(other,char) < 0))  satisfaction(char) = satisfaction(char) + 1
+			&if( (altruism(char) + likes(other,char) > 3))  satisfaction(char) = satisfaction(char) - 1
+			;
+		consenting: char;
+		
+	};
+
+action get_item(char : character, other: character, item : item) {
+		precondition:
+			char != other
+			&char != mc
+			& ((has_item(other,item) & (was_attacked(other) | wants_to_give(other,char,item)) )
+			| know_location(char,item) 
+		   )
+			//| ambition(char) > 2
+			//&meeting(char,other)
+			&!has_item(char,item)
+			
+			//&!vulnerable(char)
+			;
+
+		effect:
+			has_item(char,item)
+			&!has_item(other,item)
+			& if(!has_item(char,item)) satisfaction(char) = satisfaction(char) + 1
+			& if(vulnerable(other)) satisfaction(char) = satisfaction(char) - 1
+			;
+		consenting: char;
+		
+	};
+
+action prepare_deal(char : character, other: character, item: item) {
+		precondition:
+			char != other
+			&char != mc
+			&has_item(char,item)
+			&!has_item(other,item)
+			//&meeting(char,other)
+			
+			;
+
+		effect:
+			meeting(char,other)
+			&meeting(other,char)
+			//vulnerable(other)
+			&wants_to_give(char,other,item)
+			;
+		consenting: char,other;
+		
+	};
+
+action prepare_meeting(char : character, other: character) {
+		precondition:
+			char != other
+			&char != mc
+			&!meeting(char,other)
+			&!meeting(other,char)
+			;
+
+		effect:
+			
+			meeting(char,other)
+			&meeting(other,char)
+			& likes(other,char) = likes(other,char) + 1
+			& if((altruism(other) + likes(char,other)>2) | wants_to_meet(other,char)) satisfaction(other) = satisfaction(other) + 1
+			;
+		consenting: char,other;
+		
+	};
+
+action prepare_trap(char : character, other: character, meeted : character) {
+		precondition:
+			//char != other
+			char != mc
+			& char != meeted
+			&meeting(other,meeted)
+			;
+
+		effect:
+			
+			vulnerable(other)
+			
+			;
+		consenting: char;
+		
+	};
+
+
+
+action take_care_of(char : character, other: character) {
+		precondition:
+			
+			char != mc
+			
+			//&vulnerable(other)
+			&was_attacked(other)
+			;
+
+		effect:
+			
+			!was_attacked(other)
+			//&meeting(char,other)
+			//&meeting(other,char)
+			& if(((altruism(other) + likes(char,other)>2) | wants_to_meet(other,char)) & char != other) satisfaction(char) = satisfaction(char) + 1
+			;
+		consenting: char;
+		
+	};
+
+
+//////////////////utility
+
+utility():
+satisfaction(doctor) 
+//attacked(doctor,actor)
+//has_item(doctor,it)
+//if(exists(i : item) (wants_item(doctor,i) & has_item(doctor,i))) 1 else 0
+//+ if(exists(char: character) (wants_to_attack(doctor,char) &  attacked(doctor,char))) 1 else 0
+;
+
+//plus nie chce byc ranny
+
+
+utility(doctor):
+satisfaction(doctor)
+//if(exists(i : item) (wants_item(doctor,i) & has_item(doctor,i))) 1 else 0
+//+ if(exists(char: character) (wants_to_attack(doctor,char) &  attacked(doctor,char))) 1 else 0
+ //attacked(doctor,soldier)
+;
+
+
+
+utility(actor):
+satisfaction(actor)
+//if (satisfaction(actor) > 0) 1 else 0
+//if(exists(i : item) (wants_item(actor,i) & has_item(actor,i))) 1 else 0
+//+ if(exists(char: character) (wants_to_attack(actor,char) &  attacked(actor,char))) 1 else 0
+//+ if(exists(char: character) (wants_to_meet(actor,char) &  meeting(actor,char))) 1 else 0
+ //attacked(actor,soldier)
+;
+
+utility(soldier):
+satisfaction(soldier)
+//if(exists(i : item) (wants_item(soldier,i) & has_item(soldier,i))) 1 else 0
+//+ if(exists(char: character) (wants_to_attack(soldier,char) &  attacked(soldier,char))) 1 else 0
+//+ if(exists(char: character) (wants_to_meet(soldier,char) &  meeting(soldier,char))) 1 else 0
+	
+;
+
+
+
+
+

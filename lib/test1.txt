@@ -1,0 +1,314 @@
+
+
+type item;
+
+
+//### Properties:
+property satisfaction(char: character) : number; // Satisfaction level of each character
+property altruism(char: character) : number; // Altruism level of each character (-3 to 3)
+property ambition(char: character) : number; // Ambition level of each character (-3 to 3)
+property desperation(char: character) : number; // Ambition level of each character (-3 to 3)
+property max_desp(char: character) : number; // Ambition level of each character (-3 to 3)
+property has_item(char: character) : item; 
+property danger(char: character) : number; 
+property health(char: character) : number; 
+property blocked(char: character) : boolean; 
+
+property relation(char: character, other: character) : number; // Relationship liking level between characters (-3 to 3)
+
+entity mc : character;
+entity actress : character;
+entity actor : character;
+entity food : item;
+entity weapon : item;
+entity book : item;
+entity poison : item;
+entity money : item;
+
+
+health(mc) = 5;
+health(actress) = 5;
+health(actor) = 5;
+
+ambition(mc) = 5;
+altruism(mc) = -2;
+
+
+
+    action say_love(char:character,char2:character,item:item) {
+        precondition:
+    
+            char!=char2 &has_item(char)==item &char!=char2 &blocked(char2) 
+            ;
+        effect:
+        if (altruism(char) >= 2 & ambition(char) > 3) 
+            satisfaction(char) = satisfaction(char) + 1 
+            ;
+        consenting: char;
+    };
+
+    
+
+    action buy(char:character,item:item) {
+        precondition:
+    
+            has_item(char)==money 
+            ;
+        effect:
+        if (altruism(char) > -5 & ambition(char) < 4) 
+            satisfaction(char) = satisfaction(char) + 1 
+            ;
+        consenting: char;
+    };
+
+    
+
+    action steal_shop(char:character,item:item) {
+        precondition:
+    
+            health(char) > 0  
+            ;
+        effect:
+        if (altruism(char) < 0 & ambition(char) > 2) 
+            satisfaction(char) = satisfaction(char) + 1 
+            ;
+        consenting: char;
+    };
+
+    
+
+    action threaten_item(char:character,char2:character,item:item) {
+        precondition:
+    
+            char!=char2 &danger(char) >= danger(char2) 
+            ;
+        effect:
+        if (altruism(char) < 0 & ambition(char) > 3) 
+            satisfaction(char) = satisfaction(char) + 1 
+            ;
+        consenting: char;
+    };
+
+    
+
+    action sell(char:character,item:item) {
+        precondition:
+    
+            has_item(char)==item 
+            ;
+        effect:
+        if (altruism(char) > -5 & ambition(char) < 4) 
+            satisfaction(char) = satisfaction(char) + 1 
+            ;
+        consenting: char;
+    };
+
+    
+
+    action training_trainer(char:character) {
+        precondition:
+    
+            has_item(char)==money 
+            ;
+        effect:
+        if (altruism(char) > -5 & ambition(char) >= 2) 
+            satisfaction(char) = satisfaction(char) + 1 
+            ;
+        consenting: char;
+    };
+
+    
+
+    action take_care_of_myself(char:character) {
+        precondition:
+            has_item(char)==poison & health(char)<0
+            ;
+        effect:
+        danger(char) = danger(char)+ 1 &  !blocked(char)
+            ;
+        consenting: char;
+    };
+
+    
+
+    action fight(char:character,char2:character) {
+        precondition:
+            char!=char2 & danger(char) >0 & altruism(char) <0
+            ;
+        effect:
+        danger(char2) =danger(char2) - 1  & blocked(char2) & relation(char2,char) = -1
+            ;
+        consenting: char;
+    };
+
+    
+
+    action train_danger(char:character) {
+        precondition:
+            danger(char) <0
+            ;
+        effect:
+        danger(char) =danger(char)  + 1
+            ;
+        consenting: char;
+    };
+
+    
+
+    action steal_item(char:character,char2:character,item:item) {
+        precondition:
+            char!=char2 & altruism(char)  <0
+            ;
+        effect:
+        has_item(char)=item & has_item(char2)=?
+            ;
+        consenting: char;
+    };
+
+    
+
+    action beg_item(char:character,char2:character,item:item) {
+        precondition:
+            char!=char2 & relation(char2,char) >0  &  ambition(char)  <2
+            ;
+        effect:
+        has_item(char)=item & has_item(char2)=?
+            ;
+        consenting: char;
+    };
+
+    
+
+    action take_item(char:character,char2:character,item:item) {
+        precondition:
+            char!=char2 & danger(char) >0 & altruism(char)  <0 & ambition(char)  >1
+            ;
+        effect:
+        has_item(char)=item & relation(char2,char) = -2
+            ;
+        consenting: char;
+    };
+
+    
+
+    action give_item(char:character,char2:character,item:item) {
+        precondition:
+            char!=char2 & has_item(char)==item
+            ;
+        effect:
+        has_item(char2)=item & has_item(char)=? & relation(char2,char) = -1
+            ;
+        consenting: char;
+    };
+
+    
+
+    action poison_lightly(char:character,char2:character) {
+        precondition:
+            char!=char2 & has_item(char)==poison & altruism(char) <0
+            ;
+        effect:
+        has_item(char)=? & danger(char2) =danger(char2) - 1 & blocked(char2)
+            ;
+        consenting: char;
+    };
+
+    
+
+    action heal_someone(char:character,char2:character) {
+        precondition:
+            char!=char2 & has_item(char)==poison
+            ;
+        effect:
+        !blocked(char2) & relation(char2,char) = 1
+            ;
+        consenting: char;
+    };
+
+    
+
+    action take_care_of_someone(char:character,char2:character) {
+        precondition:
+            char!=char2 & health(char) <0
+            ;
+        effect:
+        !blocked(char2) & relation(char2,char) = 1
+            ;
+        consenting: char;
+    };
+
+    
+
+    action buy_attention(char:character,char2:character) {
+        precondition:
+            char!=char2 & has_item(char)==money
+            ;
+        effect:
+        blocked(char2) & has_item(char)=?
+            ;
+        consenting: char;
+    };
+
+    
+
+    action threaten_attention(char:character,char2:character) {
+        precondition:
+            char!=char2 & danger(char) > 0
+            ;
+        effect:
+        blocked(char2) & relation(char2,char) = -1
+            ;
+        consenting: char;
+    };
+
+    
+
+    action beg_for_someone_attention(char:character,char2:character,char3:character) {
+        precondition:
+            char!=char2 & relation(char3,char2) > 0 &  ambition(char) <2
+            ;
+        effect:
+        blocked(char3)
+            ;
+        consenting: char,char2;
+    };
+
+    
+
+    action beg_for_attention(char:character,char2:character) {
+        precondition:
+            char!=char2 & relation(char2,char) >0 &  ambition(char) <2
+            ;
+        effect:
+        blocked(char2)
+            ;
+        consenting: char,char2;
+    };
+
+    
+
+    action get_item(char:character,item:item) {
+        precondition:
+            health(char) >0
+            ;
+        effect:
+        has_item(char)=item
+            ;
+        consenting: char;
+    };
+
+    
+
+utility():
+    satisfaction(mc);
+
+utility(mc):
+    satisfaction(mc);
+
+utility(actress):
+    satisfaction(actress);
+
+utility(actor):
+    satisfaction(actor);
+
+
