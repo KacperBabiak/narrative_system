@@ -50,8 +50,9 @@ altruism(mc) = -2;
 ambition(actress) = 3;
 altruism(actress) = 2;
 
-ambition(actor) = 2;
+ambition(actor) = 3;
 altruism(actor) = -2;
+relation(actor,mc) = -3;
 
 //state(actor) = blocked;
 
@@ -77,9 +78,9 @@ altruism(actor) = -2;
     
             health(char) > 0 
             &state(char)!= blocked
-            //&ship_status(world) < 0
-            &authority(char) > 1
-            &relation(actor,mc) < 0
+             &ship_magic(world) < 0
+            &authority(char) > 3
+            //&relation(actor,mc) < 0
             ;
         effect:
             if(altruism(char) <= 2 & ambition(char) > 2 )
@@ -112,7 +113,7 @@ altruism(actor) = -2;
     
             health(char) > 0 
             &state(char)!= blocked
-            &char == actress
+            &char == mc
             ;
         effect:
             health(char2) = health(char2) - 1
@@ -126,7 +127,7 @@ altruism(actor) = -2;
     
             health(char) > 0 
             &state(char)!= blocked
-            &char == actress
+            &char == mc
             ;
         effect:
             health(char2) = health(char2) + 1 
@@ -142,7 +143,7 @@ altruism(actor) = -2;
             health(char) > 0 
             &state(char)!= blocked
             &knowledge(char) > 1
-            &char == actress
+            &char == mc
             ;
         effect:
             knowledge(char2) = knowledge(char2) - 1
@@ -156,7 +157,7 @@ altruism(actor) = -2;
     
             health(char) > 0 
             &state(char)!= blocked
-            &char == actress
+            &char == mc
             &state(char) == hidden
             ;
         effect:
@@ -171,7 +172,7 @@ altruism(actor) = -2;
     
             health(char) > 0
             &state(char)!= blocked 
-            &char == actress
+            &char == mc
             ;
         effect:
             relation(char2,char3) = relation(char2,char3) - 1 
@@ -186,7 +187,7 @@ altruism(actor) = -2;
     
             health(char) > 0 
             &state(char)!= blocked
-            &char == actress
+            &char == mc
             ;
         effect:
             relation(char2,char3) = relation(char2,char3) + 1 
@@ -216,7 +217,7 @@ altruism(actor) = -2;
             health(char) > 0 
             & state(char2) == hidden
             &state(char)!= blocked
-            &char == actress
+            &char == mc
             ;
         effect:
             state(char2) = ?
@@ -229,7 +230,7 @@ altruism(actor) = -2;
         precondition:
     
              state(char2) != blocked
-             &char == actress
+             &char == mc
             ;
         effect:
             state(char2) = blocked
@@ -244,7 +245,7 @@ altruism(actor) = -2;
             health(char) > 0 
             &state(char)!= blocked
             & state(char2) == blocked
-            &char == actress
+            &char == mc
             ;
         effect:
             state(char2) = ?
@@ -259,7 +260,7 @@ altruism(actor) = -2;
 			health(char) > 0 
 			&state(char)== blocked
 			
-			&char == char_acting
+			&char == mc
 			;
 		effect:
 			state(char) = ?
@@ -273,7 +274,7 @@ altruism(actor) = -2;
     
             health(char) > 0 
             &state(char)!= blocked
-            &char == actress
+            &char == mc
             ;
         effect:
             ship_defense(world) = ship_defense(world) - 1
@@ -287,7 +288,7 @@ altruism(actor) = -2;
     
             health(char) > 0 
             &state(char)!= blocked
-            &char == actress
+            &char == mc
             ;
         effect:
             ship_defense(world) = ship_defense(world) + 1
@@ -303,7 +304,7 @@ altruism(actor) = -2;
     
             health(char) > 0 
             &state(char)!= blocked
-            &char == actress
+            &char == mc
             ;
         effect:
             ship_magic(world) = ship_magic(world) - 1
@@ -317,7 +318,7 @@ altruism(actor) = -2;
     
             health(char) > 0 
             &state(char)!= blocked
-            &char == actress
+            &char == mc
             ;
         effect:
             ship_magic(world) = ship_magic(world) + 1
@@ -332,7 +333,7 @@ altruism(actor) = -2;
     
             health(char) > 0 
             &state(char)!= blocked
-           &char == actress
+           &char == mc
             ;
         effect:
             ship_status(world) = ship_status(world) - 1
@@ -346,7 +347,7 @@ altruism(actor) = -2;
     
             health(char) > 0 
             &state(char)!= blocked
-            &char == actress
+            &char == mc
             ;
         effect:
             ship_status(world) = ship_status(world) + 1
@@ -359,7 +360,7 @@ altruism(actor) = -2;
         precondition:
     
              state(char) != blocked
-             &char == actress
+             &char == mc
              &char != char2
              &!supports(char,char2)
             ;
@@ -375,7 +376,7 @@ action lose_support(char:character,char2:character) {
         precondition:
     
              state(char) != blocked
-             &char == actress
+             &char == mc
              &char != char2
              &supports(char,char2)
             ;
@@ -393,7 +394,7 @@ action support_money(char:character,char2:character, char3:character) {
              state(char) != blocked
              &char != char3
              &char != char2
-             &char == actress
+             &char == mc
              &!supports(char2,char3)
              &money(char) > 0
             ;
@@ -411,7 +412,7 @@ action lose_support_money(char:character,char2:character, char3:character) {
         precondition:
     
              state(char2) != blocked
-             &char == actress
+             &char == mc
              &char != char3
              &char != char2
              &supports(char2,char3)
@@ -433,7 +434,7 @@ action support_authority(char:character,char2:character, char3:character) {
              state(char2) != blocked
              &char != char3
              &char != char2
-             &char == actress
+             &char == mc
              &!supports(char2,char3)
              &authority(char) > 2
             ;
@@ -450,7 +451,7 @@ action lose_support_authority(char:character,char2:character, char3:character) {
         precondition:
     
              state(char2) != blocked
-             &char == actress
+             &char == mc
              &char != char3
              &char != char2
              &supports(char2,char3)
@@ -474,40 +475,6 @@ trigger authority_calc(char:character) {
 };
 
 
-trigger trigger1(char:character) {
-	precondition:
-		health(char) > 0
-        &ambition(char) <= 2
-        & ship_status(world) < 1
-        & state(char) != blocked
-        & later(world);
-	effect:
-		ship_status(world) = 1;
-};
-
-trigger trigger2(char:character) {
-	precondition:
-		health(char) > 0
-        &ambition(char) <= 2
-        & ship_magic(world) < 1
-        & state(char) != blocked
-        & later(world);
-	effect:
-		ship_magic(world) = 2;
-};
-
-
-trigger trigger3(char:character) {
-	precondition:
-		health(char) > 0
-        &ambition(char) <= 2
-        & ship_status(world) > 1
-        & state(char) != blocked
-        & later(world);
-	effect:
-		ship_status(world) = 0;
-};
-
 
 
 
@@ -516,7 +483,7 @@ trigger trigger3(char:character) {
 
 
 utility():
-    satisfaction(actress) ;
+    satisfaction(mc) ;
 
 utility(mc):
     satisfaction(mc);

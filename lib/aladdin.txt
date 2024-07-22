@@ -394,47 +394,6 @@ trigger not_afraid(character : character) {
 		!afraid(character);
 };
 
-trigger see_character_at(character : character, other : character, place : place) {
-	precondition:
-		alive(character) &
-		at(character) == place &
-		at(other) == place &
-		believes(character, at(other) != place);
-	effect:
-		believes(character, at(other) = place);
-};
-
-trigger see_character_not_at(character : character, other : character, place : place) {
-	precondition:
-		alive(character) &
-		at(character) == place &
-		at(other) != place &
-		believes(character, at(other) == place);
-	effect:
-		believes(character, at(other) = ?);
-};
-
-trigger see_has(character : character, other : character, item : item, place : place) {
-	precondition:
-		alive(character) &
-		at(character) == place &
-		at(other) == place &
-		at(item) == other &
-		believes(character, at(item) != other);
-	effect:
-		believes(character, at(item) = other);
-};
-
-trigger see_hasnt(character : character, other : character, item : item, place : place) {
-	precondition:
-		alive(character) &
-		at(character) == place &
-		at(other) == place &
-		at(item) != other &
-		believes(character, at(item) == other);
-	effect:
-		believes(character, at(item) = ?);
-};
 
 trigger accomplish_task_kill(worker : character, requester : character, monster : monster) {
 	precondition:

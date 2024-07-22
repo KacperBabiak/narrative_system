@@ -1,25 +1,4 @@
-from subprocess import Popen, PIPE, STDOUT
-import pandas as pd
-import time
-
-def load_action(file):
-
-		
-		p = Popen(['java', '-jar', 'lib\sabre.jar', '-p', file,'-el',"0","-h","h+",'-c','n',"-tl","5000"], stdout=PIPE, stderr=STDOUT)
-		#p = Popen(['java', '-jar', 'lib\sabre.jar', '-p', file,'-el',"0",'-g',"","-tl","1000"], stdout=PIPE, stderr=STDOUT)
-
-		lines=[]
-		for line in p.stdout:
-			lines.append(str(line, encoding='utf-8'))
-
-		#print(lines)
-		return lines 
-
-
-
-def create_file(characters,items,row):
-		with open("lib/test2.txt", 'w') as f:
-			f.write("""//### Types:
+//### Types:
 type item;
 type world;
 type state;
@@ -49,38 +28,46 @@ entity world:world;
 
 entity hidden :state;
 entity blocked :state;
-		   """
-			)
-			
-
-				#warrtosci postaci
-			for char in characters:
-			
-				f.write("entity "+ char + ": character;  \n")
-				f.write("health(" + char  +") = " + str(row[char+"_health"]) + " ;\n")
-				f.write("altruism(" + char  +") = " + str(row[char+"_altruism"]) + " ;\n")
-				f.write("ambition(" + char  +") = " + str(row[char+"_ambition"]) + " ;\n")
-				f.write("knowledge(" + char  +") = " + str(row[char+"_knowledge"]) + " ;\n")
-				f.write("support(" + char  +") = " + str(row[char+"_support"]) + " ;\n")
-				f.write("money(" + char  +") = " + str(row[char+"_money"]) + " ;\n")
-				f.write("state(" + char  +") = " + str(row[char+"_state"]) + " ;\n")
-				
-				char_without_c = characters.copy()
-				char_without_c.remove(char)
-				for c2 in char_without_c:
-					f.write("relation(" + char  +", "+ c2 +") = " + str(row[char+"_relation_"+c2]) + " ;\n")
-					if str(row[char+"_relation_"+c2]) == 1:
-						f.write("supports(" + char  +", "+ c2 +")   ;\n")
-				   
-				f.write("ship_defense(world) =" +str(row['ship_defense']) + ";  \n")
-				f.write("ship_status(world) =" +str(row['ship_status']) + " ; \n")
-				f.write("ship_magic(world) =" +str(row['ship_magic']) + ";  \n")
-			
-
-				
-				
-
-			f.write("""//key akcje
+		   entity char_acting: character;  
+health(char_acting) = 2 ;
+altruism(char_acting) = 1 ;
+ambition(char_acting) = 2 ;
+knowledge(char_acting) = 2 ;
+support(char_acting) = 0 ;
+money(char_acting) = 0 ;
+state(char_acting) = blocked ;
+relation(char_acting, char1) = 2 ;
+relation(char_acting, char2) = -2 ;
+ship_defense(world) =1;  
+ship_status(world) =0 ; 
+ship_magic(world) =-1;  
+entity char1: character;  
+health(char1) = 0 ;
+altruism(char1) = 0 ;
+ambition(char1) = 1 ;
+knowledge(char1) = 0 ;
+support(char1) = 1 ;
+money(char1) = 1 ;
+state(char1) = ? ;
+relation(char1, char_acting) = 1 ;
+relation(char1, char2) = 0 ;
+ship_defense(world) =1;  
+ship_status(world) =0 ; 
+ship_magic(world) =-1;  
+entity char2: character;  
+health(char2) = 2 ;
+altruism(char2) = 1 ;
+ambition(char2) = 0 ;
+knowledge(char2) = 0 ;
+support(char2) = 1 ;
+money(char2) = 0 ;
+state(char2) = ? ;
+relation(char2, char_acting) = -1 ;
+relation(char2, char1) = 2 ;
+ship_defense(world) =1;  
+ship_status(world) =0 ; 
+ship_magic(world) =-1;  
+//key akcje
 	action key_action1(char:character) {
 		precondition:
 	
@@ -499,52 +486,12 @@ trigger authority_calc(char:character) {
 };
 
 
-			""")
-
-			
-			
-			f.write("utility(): \n ")
-			f.write("satisfaction({}) ;\n".format("char_acting"))
-
-			
-		
-
-
-			for char in characters:
-				f.write("utility({}): \n ".format(char))
-				f.write("satisfaction({}); \n ".format(char))
-			
-			
-			f.close()
-
-characters = ['char_acting', 'char1', 'char2']
-items = ['food']
-file = 'lib/test2.txt'
-
-df = pd.read_csv('data\\creating_data\\random_states.csv')
-
-for index in range(0,len(df)):
-	print(index)
-	
-	start = time.time()
-
-	row=df.loc[index]
-	create_file(characters, items, row)
-	action = load_action(file)
-	
-
-	end = time.time()
-	
-	
-	df.loc[index,['results']] = action
-	df.loc[index,['time']] = (end-start)
-
-	print(action)
-	print(end-start)
-
-	df.to_csv('data/random_states_results.csv')
-
-	
-	
-
-#print(df)
+			utility(): 
+ satisfaction(char_acting) ;
+utility(char_acting): 
+ satisfaction(char_acting); 
+ utility(char1): 
+ satisfaction(char1); 
+ utility(char2): 
+ satisfaction(char2); 
+ 

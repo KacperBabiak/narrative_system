@@ -19,8 +19,8 @@ entity actress : character;
 entity stan1 : stan;
 
 altruism(mc) = 1;
-ambition(mc) = 4;
-desperation(mc) = 2;
+ambition(mc) = 3;
+desperation(mc) = 3;
 currentValue(stan1) = -1;
 wantsChange(mc,stan1) = 0;
 wantsChange(actress,stan1) = -1;
@@ -28,7 +28,7 @@ wantsChange(actress,stan1) = -1;
 //# Action: survive
 action key_action1(char: character) {
     precondition:
-        (ambition(char) + desperation(char) >= 4)
+        (  ambition(char) + desperation(char) >= 4 )
         & risk(char)< max_desp(char)
           ;
     effect:

@@ -1,25 +1,4 @@
-from subprocess import Popen, PIPE, STDOUT
-import pandas as pd
-import time
-
-def load_action(file):
-
-		
-		p = Popen(['java', '-jar', 'lib\sabre.jar', '-p', file,'-el',"0","-h","h+",'-c','n',"-tl","5000"], stdout=PIPE, stderr=STDOUT)
-		#p = Popen(['java', '-jar', 'lib\sabre.jar', '-p', file,'-el',"0",'-g',"","-tl","1000"], stdout=PIPE, stderr=STDOUT)
-
-		lines=[]
-		for line in p.stdout:
-			lines.append(str(line, encoding='utf-8'))
-
-		#print(lines)
-		return lines 
-
-
-
-def create_file(characters,items,row):
-		with open("lib/test2.txt", 'w') as f:
-			f.write("""//### Types:
+//### Types:
 type item;
 type world;
 type state;
@@ -49,38 +28,63 @@ entity world:world;
 
 entity hidden :state;
 entity blocked :state;
-		   """
-			)
-			
-
-				#warrtosci postaci
-			for char in characters:
-			
-				f.write("entity "+ char + ": character;  \n")
-				f.write("health(" + char  +") = " + str(row[char+"_health"]) + " ;\n")
-				f.write("altruism(" + char  +") = " + str(row[char+"_altruism"]) + " ;\n")
-				f.write("ambition(" + char  +") = " + str(row[char+"_ambition"]) + " ;\n")
-				f.write("knowledge(" + char  +") = " + str(row[char+"_knowledge"]) + " ;\n")
-				f.write("support(" + char  +") = " + str(row[char+"_support"]) + " ;\n")
-				f.write("money(" + char  +") = " + str(row[char+"_money"]) + " ;\n")
-				f.write("state(" + char  +") = " + str(row[char+"_state"]) + " ;\n")
-				
-				char_without_c = characters.copy()
-				char_without_c.remove(char)
-				for c2 in char_without_c:
-					f.write("relation(" + char  +", "+ c2 +") = " + str(row[char+"_relation_"+c2]) + " ;\n")
-					if str(row[char+"_relation_"+c2]) == 1:
-						f.write("supports(" + char  +", "+ c2 +")   ;\n")
-				   
-				f.write("ship_defense(world) =" +str(row['ship_defense']) + ";  \n")
-				f.write("ship_status(world) =" +str(row['ship_status']) + " ; \n")
-				f.write("ship_magic(world) =" +str(row['ship_magic']) + ";  \n")
-			
-
-				
-				
-
-			f.write("""//key akcje
+		   entity char1: character;  
+health(char1) = 2 ;
+altruism(char1) = 2 ;
+ambition(char1) = 3 ;
+knowledge(char1) = 0 ;
+support(char1) = 0 ;
+money(char1) = 0 ;
+state(char1) = blocked ;
+relation(char1, char2) = 0 ;
+relation(char1, char3) = 0 ;
+relation(char1, char4) = -2 ;
+ship_defense(world) =-1;  
+ship_status(world) =-1 ; 
+ship_magic(world) =1;  
+entity char2: character;  
+health(char2) = 1 ;
+altruism(char2) = -2 ;
+ambition(char2) = 0 ;
+knowledge(char2) = 1 ;
+support(char2) = 1 ;
+money(char2) = 0 ;
+state(char2) = hidden ;
+relation(char2, char1) = -1 ;
+relation(char2, char3) = 1 ;
+relation(char2, char4) = -1 ;
+ship_defense(world) =-1;  
+ship_status(world) =-1 ; 
+ship_magic(world) =1;  
+entity char3: character;  
+health(char3) = 0 ;
+altruism(char3) = 0 ;
+ambition(char3) = 3 ;
+knowledge(char3) = 0 ;
+support(char3) = 1 ;
+money(char3) = 0 ;
+state(char3) = hidden ;
+relation(char3, char1) = 1 ;
+relation(char3, char2) = 2 ;
+relation(char3, char4) = 0 ;
+ship_defense(world) =-1;  
+ship_status(world) =-1 ; 
+ship_magic(world) =1;  
+entity char4: character;  
+health(char4) = 0 ;
+altruism(char4) = 0 ;
+ambition(char4) = 3 ;
+knowledge(char4) = 0 ;
+support(char4) = 0 ;
+money(char4) = 1 ;
+state(char4) = ? ;
+relation(char4, char1) = -2 ;
+relation(char4, char2) = 0 ;
+relation(char4, char3) = 1 ;
+ship_defense(world) =-1;  
+ship_status(world) =-1 ; 
+ship_magic(world) =1;  
+//key akcje
 	action key_action1(char:character) {
 		precondition:
 	
@@ -137,7 +141,7 @@ entity blocked :state;
 	
 			health(char) > 0 
 			&state(char)!= blocked
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			health(char2) = health(char2) - 1
@@ -151,7 +155,7 @@ entity blocked :state;
 	
 			health(char) > 0 
 			&state(char)!= blocked
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			health(char2) = health(char2) + 1 
@@ -167,7 +171,7 @@ entity blocked :state;
 			health(char) > 0 
 			&state(char)!= blocked
 			&knowledge(char) > 1
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			knowledge(char2) = knowledge(char2) - 1
@@ -181,7 +185,7 @@ entity blocked :state;
 	
 			health(char) > 0 
 			&state(char)!= blocked
-			&char == char_acting
+			&char == char1
 			&state(char) == hidden
 			;
 		effect:
@@ -196,7 +200,7 @@ entity blocked :state;
 	
 			health(char) > 0
 			&state(char)!= blocked 
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			relation(char2,char3) = relation(char2,char3) - 1 
@@ -211,7 +215,7 @@ entity blocked :state;
 	
 			health(char) > 0 
 			&state(char)!= blocked
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			relation(char2,char3) = relation(char2,char3) + 1 
@@ -241,7 +245,7 @@ entity blocked :state;
 			health(char) > 0 
 			& state(char2) == hidden
 			&state(char)!= blocked
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			state(char2) = ?
@@ -254,7 +258,7 @@ entity blocked :state;
 		precondition:
 	
 			 state(char2) != blocked
-			 &char == char_acting
+			 &char == char1
 			;
 		effect:
 			state(char2) = blocked
@@ -269,7 +273,7 @@ entity blocked :state;
 			health(char) > 0 
 			&state(char)!= blocked
 			& state(char2) == blocked
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			state(char2) = ?
@@ -284,7 +288,7 @@ entity blocked :state;
 			health(char) > 0 
 			&state(char)== blocked
 			
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			state(char) = ?
@@ -298,7 +302,7 @@ entity blocked :state;
 	
 			health(char) > 0 
 			&state(char)!= blocked
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			ship_defense(world) = ship_defense(world) - 1
@@ -312,7 +316,7 @@ entity blocked :state;
 	
 			health(char) > 0 
 			&state(char)!= blocked
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			ship_defense(world) = ship_defense(world) + 1
@@ -328,7 +332,7 @@ entity blocked :state;
 	
 			health(char) > 0 
 			&state(char)!= blocked
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			ship_magic(world) = ship_magic(world) - 1
@@ -342,7 +346,7 @@ entity blocked :state;
 	
 			health(char) > 0 
 			&state(char)!= blocked
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			ship_magic(world) = ship_magic(world) + 1
@@ -357,7 +361,7 @@ entity blocked :state;
 	
 			health(char) > 0 
 			&state(char)!= blocked
-		   &char == char_acting
+		   &char == char1
 			;
 		effect:
 			ship_status(world) = ship_status(world) - 1
@@ -371,7 +375,7 @@ entity blocked :state;
 	
 			health(char) > 0 
 			&state(char)!= blocked
-			&char == char_acting
+			&char == char1
 			;
 		effect:
 			ship_status(world) = ship_status(world) + 1
@@ -384,7 +388,7 @@ entity blocked :state;
 		precondition:
 	
 			 state(char) != blocked
-			 &char == char_acting
+			 &char == char1
 			 &char != char2
 			 &!supports(char,char2)
 			;
@@ -400,7 +404,7 @@ action lose_support(char:character,char2:character) {
 		precondition:
 	
 			 state(char) != blocked
-			 &char == char_acting
+			 &char == char1
 			 &char != char2
 			 &supports(char,char2)
 			;
@@ -418,7 +422,7 @@ action support_money(char:character,char2:character, char3:character) {
 			 state(char) != blocked
 			 &char != char3
 			 &char != char2
-			 &char == char_acting
+			 &char == char1
 			 &!supports(char2,char3)
 			 &money(char) > 0
 			;
@@ -436,7 +440,7 @@ action lose_support_money(char:character,char2:character, char3:character) {
 		precondition:
 	
 			 state(char2) != blocked
-			 &char == char_acting
+			 &char == char1
 			 &char != char3
 			 &char != char2
 			 &supports(char2,char3)
@@ -458,7 +462,7 @@ action support_authority(char:character,char2:character, char3:character) {
 			 state(char2) != blocked
 			 &char != char3
 			 &char != char2
-			 &char == char_acting
+			 &char == char1
 			 &!supports(char2,char3)
 			 &authority(char) > 2
 			;
@@ -475,7 +479,7 @@ action lose_support_authority(char:character,char2:character, char3:character) {
 		precondition:
 	
 			 state(char2) != blocked
-			 &char == char_acting
+			 &char == char1
 			 &char != char3
 			 &char != char2
 			 &supports(char2,char3)
@@ -499,52 +503,14 @@ trigger authority_calc(char:character) {
 };
 
 
-			""")
-
-			
-			
-			f.write("utility(): \n ")
-			f.write("satisfaction({}) ;\n".format("char_acting"))
-
-			
-		
-
-
-			for char in characters:
-				f.write("utility({}): \n ".format(char))
-				f.write("satisfaction({}); \n ".format(char))
-			
-			
-			f.close()
-
-characters = ['char_acting', 'char1', 'char2']
-items = ['food']
-file = 'lib/test2.txt'
-
-df = pd.read_csv('data\\creating_data\\random_states.csv')
-
-for index in range(0,len(df)):
-	print(index)
-	
-	start = time.time()
-
-	row=df.loc[index]
-	create_file(characters, items, row)
-	action = load_action(file)
-	
-
-	end = time.time()
-	
-	
-	df.loc[index,['results']] = action
-	df.loc[index,['time']] = (end-start)
-
-	print(action)
-	print(end-start)
-
-	df.to_csv('data/random_states_results.csv')
-
-	
-	
-
-#print(df)
+			utility(): 
+ satisfaction(char1) > 0 & ship_defense(world) > 0;
+utility(char1): 
+ satisfaction(char1) > 0 & ship_defense(world) > 0;
+utility(char2): 
+ satisfaction(char2) > 0 ; 
+ utility(char3): 
+ satisfaction(char3) > 0 ; 
+ utility(char4): 
+ satisfaction(char4) > 0 ; 
+ 

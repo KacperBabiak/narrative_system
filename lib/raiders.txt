@@ -190,6 +190,7 @@ utility(Jones):
 		0;
 
 utility(Nazis):
+	
 	if(status(Nazis) == Immortal)
 		1
 	else
