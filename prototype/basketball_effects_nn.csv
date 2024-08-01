@@ -1,0 +1,14 @@
+action,effect,effect_function
+lose_support_authority,"!supports(char2,char3);support(char3) - 1","arg2_supports_arg3:=_0;arg3_support:-_1
+"
+travel,at(character) = to;,arg1_at:=_arg3
+arrest,underArrest(character) = 1;,arg2_underArrest:=_1
+steal,"has(item) = thief ;
+angry(victim) = 1 ;clue(Theft, item, place);",arg3_has:=_arg1;arg2_angry:=_1;Theft_arg3_arg4_clues:=_1
+play_basketball,"angry(player1) = 0 ;
+		angry(player2) = 0;",arg1_angry:=_0;arg2_angry:=_0
+kill,"!alive(victim);
+clue(Murder, item, place);",arg2_alive:=_0;Murder_arg3_arg4_clues:=_1
+find_clues,searched(place) = 1 ;,arg4_searched:=_1
+share_clues,"believes(police2, clue(crime, item, place));",arg3_arg4_arg5_clues:=_1
+suspect_of_crime,"suspect(citizen, crime);",arg2_suspect:=_arg3

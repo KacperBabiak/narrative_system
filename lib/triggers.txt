@@ -1,364 +1,457 @@
-type item;
+type location;
 type world;
 type state;
+type emotion;
 
 //### Properties:
 property health(char: character) : number; 
-property knowledge(char: character) : number; 
-property authority(char: character) : number; 
 
-
-
-
-
+property power(char: character) : number; 
 property satisfaction(char: character) : number; // Satisfaction level of each character
 property altruism(char: character) : number; // Altruism level of each character (-3 to 3)
 property ambition(char: character) : number; // Ambition level of each character (-3 to 3)
-property max_ambition(char: character) : number; // Ambition level of each character (-3 to 3)
+property desperation(char: character) : number; // Ambition level of each character (-3 to 3)
+property location(char: character) : location;
 property relation(char: character, other: character) : number; // Relationship liking level between characters (-3 to 3)
-property support(char: character) : number; 
+property support(char: character) : number;
 property supports(char: character, other: character) : boolean;
 property money(char: character) : number; 
 property state(char: character) : state; 
+property emotion(char: character) : emotion; 
 
-property ship_defense(world:world) : number; 
-property ship_magic(world:world) : number; 
-property ship_status(world:world) : number;
-
+property locked(loc:location) : boolean;
+property treasure_location(world:world) : location;
+property knows_location_treasure(char: character) : boolean; 
 property later(world:world) : boolean; 
 entity world:world;
 
 entity hidden :state;
-entity blocked :state;
+entity stuned :state;
 
+entity anger : emotion;
+entity happiness : emotion;
+entity fear : emotion;
 
 entity mc : character;
 entity actress : character;
 entity actor : character;
 entity soldier : character;
 
+entity location1 : location;
+entity location2 : location;
+entity location3 : location;
+entity location4 : location;
+entity location5 : location;
+treasure_location(world) = location5;
 
-    
 health(mc) = 2;
 health(actress) = 2;
 health(actor) = 2;
 relation(actor,mc) = -3;
-
-ambition(mc) = 5;
-altruism(mc) = -2;
-
+location(actor) = location3;
+money(actor) = 5;
+ambition(mc) = 2;
+altruism(mc) = 2;
+money(actor) = 2;
 ambition(actress) = -3;
 altruism(actress) = 2;
 
-ambition(actor) = 3;
+ambition(actor) = 5;
 altruism(actor) = -2;
 
-//state(actor) = blocked;
+//state(actor) = stuned;
 
 //key akcje
-    action key_action1(char:character) {
-        precondition:
     
-            health(char) > 0 
-            &state(char)!= blocked
-            &ship_defense(world) > 0
-            &ship_status(world) < 0
-            ;
-        effect:
-            if(altruism(char) > 2 & ambition(char) > 2 )
-                satisfaction(char) = satisfaction(char) + 1
-            ;
-        consenting: char;
-    };
-
-
-    action key_action2(char:character) {
-        precondition:
-    
-            health(char) > 0 
-            &state(char)!= blocked
-            &ship_magic(world) < 0
-            //&authority(char) > 1
-            &relation(actor,mc) < 0
-            ;
-        effect:
-            if(altruism(char) <= 2 & ambition(char) > 2 )
-                satisfaction(char) = satisfaction(char) + 1
-            
-            ;
-        consenting: char;
-    };
-
-    action key_action3(char:character) {
-        precondition:
-    
-            health(char) > 0 
-            &state(char)!= blocked
-            &ship_magic(world) > 0
-            &ship_status(world) > 0
-            ;
-        effect:
-            if(ambition(char) <= 2 )
-             satisfaction(char) = satisfaction(char) + 1
-            ;
-        consenting: char;
-    };
-
 
 //akcje
-
-    action change_health_down(char:character,char2:character) {
+    //lokacje
+    action explore(char:character, location:location) {
         precondition:
     
             health(char) > 0 
-            &state(char)!= blocked
+            &state(char)!= stuned
             &char == mc
+            &location(char) == location
+            &treasure_location(world) == location
             ;
         effect:
-            health(char2) = health(char2) - 1
+            knows_location_treasure(char)
             & later(world) 
             ;
         consenting: char;
     };
 
-    action change_health_up(char:character,char2:character) {
+     action tell_location(char:character,char2:character,char3:character, location:location) {
         precondition:
     
             health(char) > 0 
-            &state(char)!= blocked
+            &state(char)!= stuned
             &char == mc
+            &knows_location_treasure(char)
+            &!knows_location_treasure(char2)
+            &location(char) == location
+            &location(char2) == location
             ;
         effect:
-            health(char2) = health(char2) + 1 
-            & later(world)
-            ;
-        consenting: char;
-    };
-
-
-     action change_knowledge_down(char:character,char2:character) {
-        precondition:
-    
-            health(char) > 0 
-            &state(char)!= blocked
-            &knowledge(char) > 1
-            &char == mc
-            ;
-        effect:
-            knowledge(char2) = knowledge(char2) - 1
+            knows_location_treasure(char2)
+            &relation(char2,char) =  relation(char2,char) + 1
+            &if(state(char3) == hidden & location(char3) == location) knows_location_treasure(char3)
             & later(world) 
             ;
         consenting: char;
     };
 
-    action change_knowledge_up(char:character) {
+
+   
+
+/*
+    action close(char:character, location:location) {
         precondition:
     
             health(char) > 0 
-            &state(char)!= blocked
+            &state(char)!= stuned
             &char == mc
-            &state(char) == hidden
+            &location(char) == location
+            &!locked(location) 
             ;
         effect:
-            knowledge(char) = knowledge(char) + 5
-            & later(world)
-            ;
-        consenting: char;
-    };
-
-    action change_relation_down(char:character,char2:character,char3:character) {
-        precondition:
-    
-            health(char) > 0
-            &state(char)!= blocked 
-            &char == mc
-            ;
-        effect:
-            relation(char2,char3) = relation(char2,char3) - 1 
-            & health(char) = health(char) - 1 
-            & later(world)
-            ;
-        consenting: char;
-    };
-
-    action change_relation_up(char:character,char2:character,char3:character) {
-        precondition:
-    
-            health(char) > 0 
-            &state(char)!= blocked
-            &char == mc
-            ;
-        effect:
-            relation(char2,char3) = relation(char2,char3) + 1 
-            & later(world)
+            locked(location) 
+            & later(world) 
             ;
         consenting: char;
     };
 
 
-    action hide(char:character) {
+    action open(char:character, location:location) {
         precondition:
     
             health(char) > 0 
-            & state(char) != hidden
-            &state(char)!= blocked
+            &state(char)!= stuned
+            &char == mc
+            &location(char) == location
+            &locked(location) 
+            ;
+        effect:
+            !locked(location) 
+            & later(world) 
+            ;
+        consenting: char;
+    };
+*/
+
+    action travel(char:character, location:location) {
+        precondition:
+    
+            health(char) > 0 
+            &state(char)!= stuned
+            &char == mc
+            
+            &!locked(location) 
+            ;
+        effect:
+            location(char) = location
+            &state(char) = ?
+            & later(world) 
+            ;
+        consenting: char;
+    };
+
+
+    action invite(char:character,char2:character, location:location) {
+        precondition:
+    
+            health(char) > 0 
+            &state(char)!= stuned
+            &state(char2)!= stuned
+            &state(char2)!= hidden
+            &char == mc
+            &char != char2
+            &relation(char2,char) >1
+            &!locked(location) 
+            ;
+        effect:
+            location(char2) = location
+            &state(char) = ?
+            & later(world) 
+            ;
+        consenting: char;
+    };
+
+    //stany
+
+    action hide(char:character, location:location) {
+        precondition:
+    
+            health(char) > 0 
+            &state(char) != stuned
+            &char == mc
+            &location(char) == location
+             
             ;
         effect:
             state(char) = hidden
-            & later(world)
+            & later(world) 
             ;
         consenting: char;
     };
 
-    action find(char:character,char2:character) {
+
+    action find(char:character, char2:character, location:location) {
         precondition:
     
             health(char) > 0 
-            & state(char2) == hidden
-            &state(char)!= blocked
+            &state(char)!= stuned
+            &state(char2) == hidden
             &char == mc
+            &char != char2
+            &location(char) == location
+             &location(char2) == location
             ;
         effect:
             state(char2) = ?
-            & later(world)
+            & later(world) 
             ;
         consenting: char;
     };
 
-    action block(char:character,char2:character) {
-        precondition:
-    
-             state(char2) != blocked
-             &char == mc
-            ;
-        effect:
-            state(char2) = blocked
-            & later(world)
-            ;
-        consenting: char;
-    };
 
-    action unblock(char:character,char2:character) {
+    action stun(char:character, char2:character, location:location) {
         precondition:
     
             health(char) > 0 
-            &state(char)!= blocked
-            & state(char2) == blocked
+            &state(char) == hidden
+            &state(char2) != hidden
             &char == mc
+            &char != char2
+            &location(char) == location
+             &location(char2) == location
+            ;
+        effect:
+            state(char2) = stuned
+            &emotion(char2) = ?
+            & if (power(char2) ==2) power(char2) = 1
+            &if(altruism(char2) > 1 & relation(char,char2) > -1 ) satisfaction(char) = -1
+            & later(world) 
+            ;
+        consenting: char;
+    };
+    
+
+    action heal(char:character, char2:character, location:location) {
+        precondition:
+    
+            health(char) > 0 
+            &health(char2) == 1 
+            &state(char) != stuned
+            &state(char2) != hidden
+            &char == mc
+            &char != char2
+            &location(char) == location
+             &location(char2) == location
             ;
         effect:
             state(char2) = ?
-            & later(world)
+            &health(char2) = health(char2) + 1
+            &if(altruism(char2) > -2 & relation(char,char2) > 1 ) satisfaction(char) = 1
+            & later(world) 
             ;
         consenting: char;
     };
 
-    action unblock_yourself(char:character) {
-		precondition:
-	
-			health(char) > 0 
-			&state(char)== blocked
-			
-			&char == mc
-			;
-		effect:
-			state(char) = ?
-			& later(world)
-			;
-		consenting: char;
-	};
 
-    action change_ship_defense_down(char:character) {
+    action spend_time(char:character, char2:character, location:location) {
         precondition:
     
             health(char) > 0 
-            &state(char)!= blocked
+             
+            &state(char)!= stuned
+            &state(char2) == ?
             &char == mc
+            &location(char) == location
+             &location(char2) == location
             ;
         effect:
-            ship_defense(world) = ship_defense(world) - 1
-            & later(world)
+            if(relation(char2,char) == 0) relation(char2,char) = 1
+            &if(relation(char2,char) > 1) emotion(char2) = happiness
+            &if(relation(char,char2) > 1) emotion(char) = happiness
+            & later(world) 
             ;
         consenting: char;
     };
-
-    action change_ship_defense_up(char:character) {
+    
+    action make_relation_better(char:character, char2:character,  char3:character, location:location) {
         precondition:
     
             health(char) > 0 
-            &state(char)!= blocked
+             
+            &state(char)!= stuned
+            &state(char2) == ?
             &char == mc
+            &char != char2
+            &char2 != char3
+            &location(char) == location
+             &location(char2) == location
             ;
         effect:
-            ship_defense(world) = ship_defense(world) + 1
-            & later(world)
+            if(relation(char2,char3) == 0) relation(char2,char3) = 1
             
+            & later(world) 
             ;
         consenting: char;
     };
 
 
-    action change_ship_magic_down(char:character) {
+     action make_relation_worse(char:character, char2:character,  char3:character, location:location) {
         precondition:
     
             health(char) > 0 
-            &state(char)!= blocked
+             
+            &state(char)!= stuned
+            &state(char2) == ?
             &char == mc
+            &char != char2
+            &char2 != char3
+            &location(char) == location
+             &location(char2) == location
             ;
         effect:
-            ship_magic(world) = ship_magic(world) - 1
-            & later(world)
+            if(-1 < relation(char2,char3) < 2) relation(char2,char3) = relation(char2,char3) - 1
+            
+            & later(world) 
             ;
         consenting: char;
     };
 
-    action change_ship_magic_up(char:character) {
+    //pieniadze
+
+    action find_treasure(char:character, location:location) {
         precondition:
     
             health(char) > 0 
-            &state(char)!= blocked
+             
+            &state(char)!= stuned
+            
             &char == mc
+            &location(char) == location
+            &treasure_location(world) == location
+            &knows_location_treasure(char)
             ;
         effect:
-            ship_magic(world) = ship_magic(world) + 1
-            & later(world)
+            money(char) = money(char) + 2
+            &treasure_location(world) = ?
+            & emotion(char) = happiness
+            & later(world) 
             ;
         consenting: char;
     };
 
-
-    action change_ship_status_down(char:character) {
+/*
+    action gift(char:character, char2:character, location:location) {
         precondition:
     
             health(char) > 0 
-            &state(char)!= blocked
-           &char == mc
-            ;
-        effect:
-            ship_status(world) = ship_status(world) - 1
-            & later(world)
-            ;
-        consenting: char;
-    };
-
-    action change_ship_status_up(char:character) {
-        precondition:
-    
-            health(char) > 0 
-            &state(char)!= blocked
+            &money(char) > 0
+            &state(char)!= stuned
+            &state(char2) == ?
             &char == mc
+            &char!=char2
+            &location(char) == location
+             &location(char2) == location
             ;
         effect:
-            ship_status(world) = ship_status(world) + 1
+            relation(char2,char) = relation(char2,char) + 2
+            &money(char) = money(char) - 1
+            &money(char2) = money(char2) + 1
+            &if(relation(char2,char) > 1) emotion(char2) = happiness
+            &if(relation(char,char2) > 1) emotion(char) = happiness
+            &if(altruism(char2) > 0 & relation(char,char2) > 2 ) satisfaction(char) = 1
+            & later(world) 
             ;
         consenting: char;
     };
+*/
+
+
+
+    action take(char:character, char2:character, location:location) {
+        precondition:
+    
+            health(char) > 0 
+            &money(char2) > 0
+            &state(char)!= stuned
+            &char!=char2
+            &(
+                (power(char) >= power(char2)) 
+                | 
+                (state(char2) == stuned)
+                |
+                support(char) >= support(char2)
+                )
+            &char == mc
+            &location(char) == location
+             &location(char2) == location
+            ;
+        effect:
+            relation(char2,char) = relation(char2,char) - 2
+            &money(char) = money(char) + 1
+            &money(char2) = money(char2) - 1
+            &if(relation(char2,char) > 1) emotion(char2) = anger
+            &if(ambition(char2) < 2) emotion(char2) = fear
+            &if(altruism(char) > 1 & relation(char,char2) > -1 ) satisfaction(char) = -1
+            & later(world) 
+            ;
+        consenting: char;
+    };
+
+
+    action harm(char:character,char2:character, location:location) {
+        precondition:
+    
+            health(char) > 0 
+            &state(char)!= stuned
+           
+            &state(char2) == ?
+            &char != char2
+            &char == mc
+            &location(char) == location
+             &location(char2) == location
+            ;
+        effect:
+            health(char2) = health(char2) - 1
+            &relation(char2,char) = relation(char2,char) - 2
+            &if(relation(char2,char) > 1) emotion(char2) = anger
+            &if(ambition(char2) < 2) emotion(char2) = fear
+            &if(altruism(char2) < 2 & relation(char,char2) < -1 & ambition(char)>1) satisfaction(char) = 1
+            
+            & later(world) 
+            ;
+        consenting: char;
+    };
+
+    action train(char:character) {
+        precondition:
+    
+            health(char) > 0 
+            &state(char) != stuned
+            &char == mc
+            &power(char) == 1
+             
+            ;
+        effect:
+            power(char) = 2
+            & later(world) 
+            ;
+        consenting: char;
+    };
+
+   
 
 
     action support(char:character,char2:character, char3:character) {
         precondition:
     
-             state(char) != blocked
+             state(char) != stuned
              &char == mc
              &char != char2
              &!supports(char,char2)
@@ -366,15 +459,17 @@ altruism(actor) = -2;
         effect:
             supports(char,char2)
             & support(char2) = support(char2) + 1
+            &if( relation(char3,char2) < -2 ) satisfaction(char) = -1
             & later(world)
             ;
         consenting: char;
     };
 
-action lose_support(char:character,char2:character) {
+/*
+action lose_support(char:character,char2:character,char3 : character) {
         precondition:
     
-             state(char) != blocked
+             state(char) != stuned
              &char == mc
              &char != char2
              &supports(char,char2)
@@ -382,173 +477,44 @@ action lose_support(char:character,char2:character) {
         effect:
             !supports(char,char2)
             & support(char2) = support(char2) - 1
+            &if( relation(char3,char2) < -2 ) satisfaction(char) = 1
             & later(world)
             ;
         consenting: char;
     };
+*/
 
-action support_money(char:character,char2:character, char3:character) {
+
+
+trigger lose_sat_relation(char:character,char2:character) {
         precondition:
     
-             state(char) != blocked
-             &char != char3
-             &char != char2
-             &char == mc
-             &!supports(char2,char3)
-             &money(char) > 0
+             satisfaction(char) > -1
+             & relation(char2,char) < -1
+             & relation(char,char2) > 1
+             & !later(world)
             ;
         effect:
-            supports(char2,char3)
-            & support(char3) = support(char3) + 1
-            & later(world)
-            &money(char) = money(char) - 1
-            &money(char2) = money(char2) + 1
+            satisfaction(char) = -1
             ;
-        consenting: char;
-    };
-
-action lose_support_money(char:character,char2:character, char3:character) {
-        precondition:
-    
-            state(char2) != blocked
-            &char == mc
-            &char != char3
-            &char != char2
-            &supports(char2,char3)
-            &money(char) > 0
-            ;
-        effect:
-            !supports(char2,char3)
-            & support(char3) = support(char3) - 1
-            & later(world)
-            &money(char) = money(char) - 1
-            &money(char2) = money(char2) + 1
-            ;
-        consenting: char;
-    };
-
-action support_authority(char:character,char2:character, char3:character) {
-        precondition:
-    
-             state(char2) != blocked
-             &char != char3
-             &char != char2
-             &char == mc
-             &!supports(char2,char3)
-             &authority(char) > 2
-            ;
-        effect:
-            supports(char2,char3)
-            & support(char3) = support(char3) + 1
-            & later(world)
-           
-            ;
-        consenting: char;
-    };
-
-action lose_support_authority(char:character,char2:character, char3:character) {
-        precondition:
-    
-             state(char2) != blocked
-             &char == mc
-             &char != char3
-             &char != char2
-             &supports(char2,char3)
-             &authority(char) > 2
-            ;
-        effect:
-            !supports(char2,char3)
-            & support(char3) = support(char3) - 1
-            & later(world)
-            
-            ;
-        consenting: char;
-    };
-
-
-trigger authority_calc(char:character) {
-	precondition:
-		authority(char) != (if (health(char)>=2)  1 else 0 )+  knowledge(char) + support(char)  ;
-	effect:
-		authority(char) == (if (health(char)>=2)  1 else 0 ) +  knowledge(char)   + support(char)   ;
-};
-
-
-
-trigger trigger1(char:character,char2:character) {
-	precondition:
-		health(char) > 0
-        & state(char) != blocked
-        & state(char2) != blocked
-        & later(world)
-        & ambition(char2) >= 2.5
-        & relation(char2,char) < -1
-        ;
-	effect:
-		health(char) = health(char) - 1
-        ;
-};
-
-
-trigger trigger2(char:character) {
-	precondition:
-		health(char) > 0
-        & state(char) != blocked
-        & later(world)
-        & ambition(char) <= 2.5
-        & ship_magic(world) <= 0.5
-        & ship_status(world) <= 0.5
-        ;
-	effect:
-		ship_magic(world) = ship_magic(world) +1
-        ;
-};
-
-trigger trigger3(char:character ) {
-	precondition:
-		health(char) < 2
-        & state(char) != blocked
-        & state(char) == hidden
-        & later(world)
-        & ambition(char) > 2.5
-        & knowledge(char) < 1
         
-        ;
-	effect:
-		knowledge(char)  = knowledge(char) + 1
-        ;
-};
-
-
-trigger trigger4(char:character ) {
-	precondition:
-		health(char) > 0 
-        & state(char) != blocked
-        & state(char) != hidden
-        & later(world)
-        & ambition(char) > 2.5
-        
-        
-        ;
-	effect:
-		state(char) = hidden
-        ;
-};
-
-
-
-
-
-
-
-
-
+    };
 
 utility():
-    satisfaction(mc) ;
+    if (health(mc) < 1 ) 
+      0
+    elseif(satisfaction(mc) < 0)
+        0
+    elseif( money(mc) > ambition(mc)| satisfaction(mc) > 0) 1 else 0
+    ;
 
 utility(mc):
-    satisfaction(mc);
+    if (health(mc) < 1 ) 
+      0
+    elseif(satisfaction(mc) < 0)
+        0
+    elseif( money(mc) > ambition(mc) | satisfaction(mc) > 0) 1 else 0
+    ;
 
 utility(actress):
     satisfaction(actress);
