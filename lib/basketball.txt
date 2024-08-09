@@ -239,8 +239,7 @@ trigger see_gone(character : character, other : character, place : place){
 };
 
 utility():
-	(if((sum(c : citizen) underArrest(c)) > 0) 1 else 0) +
-	(if((sum(c : citizen) angry(c)) < 2) 1 else 0);
+	angry(Alice) == 0 & underArrest(Alice) == 1;
 
 utility(Alice): 1 - angry(Alice);
 

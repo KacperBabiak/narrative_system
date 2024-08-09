@@ -79,7 +79,7 @@ alive(Alice);
 angry(Alice) = 1;
 at(Alice) = Downtown;
 alive(Bob);
-at(Bob) = HomeB;
+at(Bob) = BasketballCourt;
 has(Basketball) = Bob;
 alive(Charlie);
 angry(Charlie) = 1;
@@ -137,7 +137,8 @@ action play_basketball(player1 : citizen, player2 : citizen, place : basketballP
 		alive(player1) &
 		at(player2) == place &
 		alive(player2) &
-		has(Basketball) == player1 ;
+		has(Basketball) == player1 
+		&player1==Alice;
 	effect:
 		angry(player1) = 0 &
 		angry(player2) = 0;
@@ -240,20 +241,32 @@ trigger see_gone(character : character, other : character, place : place){
 	effect:
 		believes(character, at(other) = ?);
 };
+/*
 
-
-trigger alice_trigger(character : character){
+trigger bob_trigger(character : character){
 	precondition:
-		 angry(Alice) == 1
+		angry(Alice) == 1
 		& at(Bob) != BasketballCourt
+		& ((has(Basketball) == Bob) | (has(Basketball) == Alice & at(Alice) == BasketballCourt))
 		;
 	effect:
 		at(Bob) = BasketballCourt;
 };
 
+trigger alice_trigger(character : character){
+	precondition:
+		angry(Alice) == 1
+		& at(Alice) != BasketballCourt
+		& ((has(Basketball) == Alice) | (has(Basketball) == Bob & at(Bob) == BasketballCourt))
+		;
+	effect:
+		at(Alice) = BasketballCourt;
+};
+
+*/
 
 utility():
-	(sum(c : citizen) underArrest(c)) + (sum(p : place) searched(p));
+	 1 - angry(Alice);
 
 utility(Alice): 1 - angry(Alice);
 

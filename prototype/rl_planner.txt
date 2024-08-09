@@ -29,7 +29,7 @@ entity Bat : item;
 entity Theft : crime;
 entity Murder : crime;
 
-		   !alive(Alice)  ;
+		   alive(Alice)  ;
 underArrest(Alice) = 0 ;
 angry(Alice) = 1 ;
 at(Alice) = Downtown ;
@@ -40,7 +40,6 @@ at(Bob) = HomeB ;
 alive(Charlie)  ;
 underArrest(Charlie) = 0 ;
 angry(Charlie) = 1 ;
-suspect(Charlie, Murder)   ;
 at(Charlie) = Downtown ;
 alive(Sherlock)  ;
 underArrest(Sherlock) = 0 ;
@@ -51,7 +50,6 @@ searched(BasketballCourt) = 0 ;
 searched(Downtown) = 0 ;
 has(Basketball) = Bob ;
 has(Bat) = Charlie ;
-clue(Murder,Bat,Downtown)   ;
 
 action travel(character : character, from : place, to : place){
 	precondition:
@@ -205,7 +203,7 @@ trigger see_gone(character : character, other : character, place : place){
 };
 
 			utility(): 
- (sum(c : citizen) underArrest(c)); 
+ angry(Alice) == 0;
 utility(Alice): 
  1 - angry(Alice);
 utility(Bob): 

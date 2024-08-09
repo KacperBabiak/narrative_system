@@ -75,21 +75,26 @@ entity Bat : item;
 entity Theft : crime;
 entity Murder : crime;
 
-!alive(Alice);
+alive(Alice);
 angry(Alice) = 1;
-at(Alice) = Downtown;
+suspect(Alice,Murder);
+at(Alice) = BasketballCourt;
+
 alive(Bob);
-at(Bob) = HomeB;
-has(Basketball) = Bob;
+at(Bob) = BasketballCourt;
+has(Basketball) = Charlie;
+
 alive(Charlie);
 angry(Charlie) = 1;
-at(Charlie) = Downtown;
+at(Charlie) = BasketballCourt;
 has(Bat) = Charlie;
+suspect(Charlie,Murder);
+
 alive(Sherlock);
-at(Sherlock) = Downtown;
-believes(Sherlock,clue(Murder, Bat, Downtown));
-clue(Murder, Bat, Downtown);
-searched(Downtown) = 1;
+at(Sherlock) = HomeB;
+suspect(Sherlock,Murder);
+searched(BasketballCourt);
+searched(Downtown);
 
 action travel(character : character, from : place, to : place){
 	precondition:
@@ -165,8 +170,7 @@ action kill(killer : citizen, victim : citizen, item : item, place : place){
 action find_clues(police : police, crime : crime, item : item, place : place){
 	precondition:
 		at(police) == place &
-		alive(police)
-		&clue(crime, item, place);
+		alive(police);
 	effect:
 		searched(place) = 1 &
 		if(clue(crime, item, place))
@@ -243,7 +247,9 @@ trigger see_gone(character : character, other : character, place : place){
 };
 
 utility():
-	((sum(c : citizen) underArrest(c)) + (sum(p : place) searched(p))) ;
+	(if((sum(c : citizen) underArrest(c)) > 0) 1 else 0) +
+	(if((sum(c : citizen) angry(c)) < 2) 1 else 0);
+
 utility(Alice): 1 - angry(Alice);
 
 utility(Bob): 3 - (sum(c : citizen) angry(c));

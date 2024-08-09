@@ -29,36 +29,34 @@ entity Bat : item;
 entity Theft : crime;
 entity Murder : crime;
 
-		   !alive(Alice)  ;
-underArrest(Alice) = 1 ;
-angry(Alice) = 0 ;
-at(Alice) = Downtown ;
-!alive(Bob)  ;
+		   alive(Alice)  ;
+underArrest(Alice) = 0 ;
+angry(Alice) = 1 ;
+at(Alice) = HomeB ;
+alive(Bob)  ;
 underArrest(Bob) = 0 ;
-angry(Bob) = 1 ;
-suspect(Bob, Theft)   ;
+angry(Bob) = 0 ;
 at(Bob) = HomeB ;
 alive(Charlie)  ;
-underArrest(Charlie) = 1 ;
+underArrest(Charlie) = 0 ;
 angry(Charlie) = 0 ;
-at(Charlie) = Downtown ;
-!alive(Sherlock)  ;
+at(Charlie) = HomeB ;
+alive(Sherlock)  ;
 underArrest(Sherlock) = 0 ;
 angry(Sherlock) = 1 ;
-at(Sherlock) = BasketballCourt ;
-searched(HomeB) = 0 ;
-searched(BasketballCourt) = 0 ;
+at(Sherlock) = Downtown ;
+searched(HomeB) = 1 ;
+searched(BasketballCourt) = 1 ;
 searched(Downtown) = 1 ;
-has(Basketball) = Charlie ;
-has(Bat) = Bob ;
-clue(Theft,Basketball,BasketballCourt)   ;
-clue(Theft,Basketball,Downtown)   ;
+has(Basketball) = Bob ;
+has(Bat) = Charlie ;
 
 action travel(character : character, from : place, to : place){
 	precondition:
 		from != to & 
 		at(character) == from &
-		alive(character);
+		alive(character)
+		&character == Charlie;
 	effect:
 		at(character) = to;
 	consenting: character; 
@@ -72,7 +70,7 @@ action arrest(police : police, character : character, place : place, crime : cri
 		police != character &
 		alive(police) &
 		alive(character) &
-		suspect(character, crime);
+		suspect(character, crime)&police == Charlie;
 	effect:
 		underArrest(character) = 1;
 	consenting: police;
@@ -85,7 +83,7 @@ action steal(thief : citizen, victim : citizen, item : item, place : place){
 		at(victim) == place &
 		has(item) == victim &
 		thief != victim &
-		alive(thief);
+		alive(thief)&thief == Charlie;
 	effect:
 		has(item) = thief &
 		angry(victim) = 1 &
@@ -101,7 +99,7 @@ action play_basketball(player1 : citizen, player2 : citizen, place : basketballP
 		alive(player1) &
 		at(player2) == place &
 		alive(player2) &
-		has(Basketball) == player1;
+		has(Basketball) == player1 & player1 == Charlie;
 	effect:
 		angry(player1) = 0 &
 		angry(player2) = 0;
@@ -117,7 +115,7 @@ action kill(killer : citizen, victim : citizen, item : item, place : place){
 		alive(killer) &
 		alive(victim) &
 		has(item) == killer &
-		underArrest(killer) == 0;
+		underArrest(killer) == 0 & killer == Charlie;
 	effect:
 		!alive(victim) &
 		clue(Murder, item, place);
@@ -129,7 +127,7 @@ action find_clues(police : police, crime : crime, item : item, place : place){
 	precondition:
 		at(police) == place &
 		alive(police)
-		&clue(crime, item, place);
+		&clue(crime, item, place) &police == Charlie;
 	effect:
 		searched(place) = 1 &
 		if(clue(crime, item, place))
@@ -145,7 +143,7 @@ action share_clues(police1 : police, police2 : police, crime : crime, item : ite
 		alive(police1) &
 		at(police2) == place &
 		alive(police2) &
-		clue(crime, item, place);
+		clue(crime, item, place) &police1 == Charlie ;
 	effect:
 		believes(police2, clue(crime, item, place));
 	consenting: police1;
@@ -159,14 +157,14 @@ action suspect_of_crime(police : police, citizen : citizen, crime : crime, item 
 		alive(police) &
 		at(citizen) == place &
 		alive(citizen) &
-		has(item) == citizen &
+		has(item) == citizen
+		&police == Charlie &
 		exists(p : place) clue(crime, item, p);
 	effect:
 		suspect(citizen, crime);
 	consenting: police;
 	observing(c : character) : at(c) == place;
 };
-
 trigger see_has(character : character, other : character, item : item, place : place){
 	precondition:
 		at(character) == place &
@@ -206,7 +204,7 @@ trigger see_gone(character : character, other : character, place : place){
 };
 
 			utility(): 
- 1 - angry(Alice);
+ if(!alive(Alice)) 1 else 0;
 utility(Alice): 
  1 - angry(Alice);
 utility(Bob): 
