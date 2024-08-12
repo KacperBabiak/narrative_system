@@ -29,101 +29,110 @@ entity Bat : item;
 entity Theft : crime;
 entity Murder : crime;
 
-		   believes(Alice,alive(Alice) ) ;
-believes(Alice,underArrest(Alice) = 0) ;
+		   believes(Alice,!alive(Alice) ) ;
+believes(Alice,underArrest(Alice) = 1) ;
 believes(Alice,angry(Alice) = 1) ;
+believes(Alice,suspect(Alice, Theft)   ) ;
 believes(Alice,at(Alice) = HomeB) ;
 believes(Alice,alive(Bob) ) ;
 believes(Alice,underArrest(Bob) = 0) ;
-believes(Alice,angry(Bob) = 1) ;
-believes(Alice,at(Bob) = BasketballCourt) ;
+believes(Alice,angry(Bob) = 0) ;
+believes(Alice,at(Bob) = HomeB) ;
 believes(Alice,alive(Charlie) ) ;
 believes(Alice,underArrest(Charlie) = 0) ;
 believes(Alice,angry(Charlie) = 0) ;
+believes(Alice,suspect(Charlie, Theft)   ) ;
 believes(Alice,at(Charlie) = HomeB) ;
 believes(Alice,alive(Sherlock) ) ;
 believes(Alice,underArrest(Sherlock) = 0) ;
-believes(Alice,angry(Sherlock) = 1) ;
-believes(Alice,at(Sherlock) = BasketballCourt) ;
-believes(Alice,searched(HomeB) = 0) ;
-believes(Alice,searched(BasketballCourt) = 1) ;
+believes(Alice,angry(Sherlock) = 0) ;
+believes(Alice,at(Sherlock) = HomeB) ;
+believes(Alice,searched(HomeB) = 1) ;
+believes(Alice,searched(BasketballCourt) = 0) ;
 believes(Alice,searched(Downtown) = 0) ;
 believes(Alice,has(Basketball) = Charlie) ;
 believes(Alice,has(Bat) = Bob) ;
 believes(Alice,clue(Theft,Basketball,HomeB)) ;
+believes(Bob,!alive(Alice) ) ;
+believes(Bob,underArrest(Alice) = 1) ;
+believes(Bob,angry(Alice) = 1) ;
+believes(Bob,suspect(Alice, Theft)   ) ;
+believes(Bob,at(Alice) = HomeB) ;
+believes(Bob,alive(Bob) ) ;
+believes(Bob,underArrest(Bob) = 0) ;
+believes(Bob,angry(Bob) = 0) ;
+believes(Bob,at(Bob) = HomeB) ;
+believes(Bob,alive(Charlie) ) ;
+believes(Bob,underArrest(Charlie) = 0) ;
+believes(Bob,angry(Charlie) = 0) ;
+believes(Bob,suspect(Charlie, Theft)   ) ;
+believes(Bob,at(Charlie) = HomeB) ;
+believes(Bob,alive(Sherlock) ) ;
+believes(Bob,underArrest(Sherlock) = 0) ;
+believes(Bob,angry(Sherlock) = 0) ;
+believes(Bob,at(Sherlock) = HomeB) ;
+believes(Bob,searched(HomeB) = 1) ;
+believes(Bob,searched(BasketballCourt) = 0) ;
+believes(Bob,searched(Downtown) = 0) ;
+believes(Bob,has(Basketball) = Charlie) ;
+believes(Bob,has(Bat) = Bob) ;
+believes(Charlie,!alive(Alice) ) ;
+believes(Charlie,underArrest(Alice) = 1) ;
+believes(Charlie,angry(Alice) = 1) ;
+believes(Charlie,suspect(Alice, Theft)   ) ;
+believes(Charlie,at(Alice) = HomeB) ;
+believes(Charlie,alive(Bob) ) ;
+believes(Charlie,underArrest(Bob) = 0) ;
+believes(Charlie,angry(Bob) = 0) ;
+believes(Charlie,at(Bob) = HomeB) ;
+believes(Charlie,alive(Charlie) ) ;
+believes(Charlie,underArrest(Charlie) = 0) ;
+believes(Charlie,angry(Charlie) = 0) ;
+believes(Charlie,suspect(Charlie, Theft)   ) ;
+believes(Charlie,at(Charlie) = HomeB) ;
+believes(Charlie,alive(Sherlock) ) ;
+believes(Charlie,underArrest(Sherlock) = 0) ;
+believes(Charlie,angry(Sherlock) = 0) ;
+believes(Charlie,at(Sherlock) = HomeB) ;
+believes(Charlie,searched(HomeB) = 1) ;
+believes(Charlie,searched(BasketballCourt) = 0) ;
+believes(Charlie,searched(Downtown) = 0) ;
+believes(Charlie,has(Basketball) = Charlie) ;
+believes(Charlie,has(Bat) = Bob) ;
+believes(Charlie,clue(Theft,Basketball,HomeB)) ;
+believes(Charlie,clue(Murder,Basketball,HomeB)) ;
 alive(Alice) ;
-underArrest(Alice) = 0;
+underArrest(Alice) = 1;
 angry(Alice) = 1;
+suspect(Alice, Theft)   ;
 at(Alice) = HomeB;
 alive(Bob) ;
 underArrest(Bob) = 0;
-angry(Bob) = 1;
-at(Bob) = BasketballCourt;
+angry(Bob) = 0;
+at(Bob) = HomeB;
 alive(Charlie) ;
 underArrest(Charlie) = 0;
 angry(Charlie) = 0;
+suspect(Charlie, Theft)   ;
 at(Charlie) = HomeB;
 alive(Sherlock) ;
 underArrest(Sherlock) = 0;
-angry(Sherlock) = 1;
-at(Sherlock) = BasketballCourt;
-searched(HomeB) = 0;
+angry(Sherlock) = 0;
+at(Sherlock) = HomeB;
+searched(HomeB) = 1;
 searched(BasketballCourt) = 1;
 searched(Downtown) = 0;
 has(Basketball) = Charlie;
 has(Bat) = Bob;
 clue(Theft,Basketball,HomeB);
-believes(Charlie,alive(Alice) ) ;
-believes(Charlie,underArrest(Alice) = 0) ;
-believes(Charlie,angry(Alice) = 1) ;
-believes(Charlie,at(Alice) = HomeB) ;
-believes(Charlie,alive(Bob) ) ;
-believes(Charlie,underArrest(Bob) = 0) ;
-believes(Charlie,angry(Bob) = 1) ;
-believes(Charlie,at(Bob) = BasketballCourt) ;
-believes(Charlie,alive(Charlie) ) ;
-believes(Charlie,underArrest(Charlie) = 0) ;
-believes(Charlie,angry(Charlie) = 0) ;
-believes(Charlie,at(Charlie) = HomeB) ;
-believes(Charlie,alive(Sherlock) ) ;
-believes(Charlie,underArrest(Sherlock) = 0) ;
-believes(Charlie,angry(Sherlock) = 1) ;
-believes(Charlie,at(Sherlock) = BasketballCourt) ;
-believes(Charlie,searched(HomeB) = 0) ;
-believes(Charlie,searched(BasketballCourt) = 1) ;
-believes(Charlie,searched(Downtown) = 0) ;
-believes(Charlie,has(Basketball) = Charlie) ;
-believes(Charlie,has(Bat) = Bob) ;
-believes(Charlie,clue(Theft,Basketball,HomeB)) ;
-believes(Sherlock,alive(Alice) ) ;
-believes(Sherlock,underArrest(Alice) = 0) ;
-believes(Sherlock,angry(Alice) = 1) ;
-believes(Sherlock,at(Alice) = HomeB) ;
-believes(Sherlock,alive(Bob) ) ;
-believes(Sherlock,underArrest(Bob) = 0) ;
-believes(Sherlock,angry(Bob) = 1) ;
-believes(Sherlock,at(Bob) = BasketballCourt) ;
-believes(Sherlock,alive(Charlie) ) ;
-believes(Sherlock,underArrest(Charlie) = 0) ;
-believes(Sherlock,angry(Charlie) = 0) ;
-believes(Sherlock,at(Charlie) = HomeB) ;
-believes(Sherlock,alive(Sherlock) ) ;
-believes(Sherlock,underArrest(Sherlock) = 0) ;
-believes(Sherlock,angry(Sherlock) = 1) ;
-believes(Sherlock,at(Sherlock) = BasketballCourt) ;
-believes(Sherlock,searched(HomeB) = 0) ;
-believes(Sherlock,searched(BasketballCourt) = 1) ;
-believes(Sherlock,searched(Downtown) = 0) ;
-believes(Sherlock,has(Basketball) = Charlie) ;
-believes(Sherlock,has(Bat) = Bob) ;
-believes(Sherlock,clue(Theft,Basketball,HomeB)) ;
+clue(Murder,Basketball,HomeB);
 
 action travel(character : character, from : place, to : place){
 	precondition:
 		from != to & 
 		at(character) == from &
 		alive(character)
-		&character == Bob;
+		&character == Sherlock;
 	effect:
 		at(character) = to;
 	consenting: character; 
@@ -137,7 +146,7 @@ action arrest(police : police, character : character, place : place, crime : cri
 		police != character &
 		alive(police) &
 		alive(character) &
-		suspect(character, crime)&police == Bob;
+		suspect(character, crime)&police == Sherlock;
 	effect:
 		underArrest(character) = 1;
 	consenting: police;
@@ -150,7 +159,7 @@ action steal(thief : citizen, victim : citizen, item : item, place : place){
 		at(victim) == place &
 		has(item) == victim &
 		thief != victim &
-		alive(thief)&thief == Bob;
+		alive(thief)&thief == Sherlock;
 	effect:
 		has(item) = thief &
 		angry(victim) = 1 &
@@ -166,7 +175,7 @@ action play_basketball(player1 : citizen, player2 : citizen, place : basketballP
 		alive(player1) &
 		at(player2) == place &
 		alive(player2) &
-		has(Basketball) == player1 & player1 == Bob;
+		has(Basketball) == player1 & player1 == Sherlock;
 	effect:
 		angry(player1) = 0 &
 		angry(player2) = 0;
@@ -182,7 +191,7 @@ action kill(killer : citizen, victim : citizen, item : item, place : place){
 		alive(killer) &
 		alive(victim) &
 		has(item) == killer &
-		underArrest(killer) == 0 & killer == Bob;
+		underArrest(killer) == 0 & killer == Sherlock;
 	effect:
 		!alive(victim) &
 		clue(Murder, item, place);
@@ -194,7 +203,7 @@ action find_clues(police : police, crime : crime, item : item, place : place){
 	precondition:
 		at(police) == place &
 		alive(police)
-		&clue(crime, item, place) &police == Bob;
+		&police == Sherlock;
 	effect:
 		searched(place) = 1 &
 		if(clue(crime, item, place))
@@ -210,7 +219,7 @@ action share_clues(police1 : police, police2 : police, crime : crime, item : ite
 		alive(police1) &
 		at(police2) == place &
 		alive(police2) &
-		clue(crime, item, place) &police1 == Bob ;
+		clue(crime, item, place) &police1 == Sherlock ;
 	effect:
 		believes(police2, clue(crime, item, place));
 	consenting: police1;
@@ -225,7 +234,7 @@ action suspect_of_crime(police : police, citizen : citizen, crime : crime, item 
 		at(citizen) == place &
 		alive(citizen) &
 		has(item) == citizen
-		&police == Bob &
+		&police == Sherlock &
 		exists(p : place) clue(crime, item, p);
 	effect:
 		suspect(citizen, crime);
@@ -271,12 +280,11 @@ trigger see_gone(character : character, other : character, place : place){
 };
 
 			utility(): 
- 3 - (sum(c : citizen) angry(c));
-utility(Alice): 
+ (sum(c : citizen) underArrest(c));utility(Alice): 
  1 - angry(Alice);
 utility(Bob): 
  3 - (sum(c : citizen) angry(c));
 utility(Charlie): 
  if(!alive(Alice)) 1 else 0;
 utility(Sherlock): 
- (sum(c : citizen) underArrest(c)); 
+ (sum(c : citizen) underArrest(c));
