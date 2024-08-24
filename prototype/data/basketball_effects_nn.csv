@@ -1,0 +1,17 @@
+action,effect,effect_function,effect_args
+lose_support_authority,"!supports(char2,char3);support(char3) - 1","arg2_supports_arg3:=_0;arg3_support:-_1
+","!supports(char2,char3);support(char3) - 1"
+travel,at(character) = to;,arg1_at:=_arg3,at(arg1) = arg3;
+arrest,underArrest(character) = 1;,arg2_underArrest:=_1,underArrest(arg1) = 1;
+steal,"has(item) = thief ;
+angry(victim) = 1 ;clue(Theft, item, place);",arg3_has:=_arg1;arg2_angry:=_1;Theft_arg3_arg4_clues:=_1,"has(arg3) = arg1 ;
+angry(arg2) = 1 ;clue(Theft, arg3, arg4);"
+play_basketball,"angry(player1) = 0 ;
+		angry(player2) = 0;",arg1_angry:=_0;arg2_angry:=_0,"angry(arg1) = 0 ;
+                angry(arg2) = 0;"
+kill,"!alive(victim);
+clue(Murder, item, place);",arg2_alive:=_0;Murder_arg3_arg4_clues:=_1,"!alive(arg2);
+clue(Murder,arg3, arg4);"
+find_clues,searched(place) = 1 ;,arg4_searched:=_1,searched(arg4) = 1 ;
+share_clues,"believes(police2, clue(crime, item, place));",arg3_arg4_arg5_clues:=_1,"believes(arg2, clue(arg3, arg4, arg5));"
+suspect_of_crime,"suspect(citizen, crime);",arg2_suspect:=_arg3,"suspect(arg2, arg3);"
