@@ -1,0 +1,353 @@
+type place;
+type pirate;
+type world;
+
+property power(character : character) : number;
+property injured(character : character) : number;
+property satisfaction(character : character) : number;
+property state(character : character) : number; //0 - nic 1- odwrócenie uwagi 2 -og³uszenie
+property at(character : character) : place;
+property treasure(character : character) : number;
+property altruism(character : character) : number;
+property ambition(character : character) : number;
+property knows_location_treasure(character : character) : number;
+property has_access_pirates(character : character) : number;
+
+property world_state(world : world) : number; //dzieñ, noc, s³aba pogoda 
+property later(world : world) : boolean;
+property pirates_knows_location_treasure(pirate : pirate) : number;
+property pirates_relation(pirate : pirate) : number; //s³aba, neutralna, dobra
+property pirates_power(pirate : pirate) : number; 
+property pirates_treasure(pirate : pirate) : number; 
+
+property distraction(place:place) :number;
+
+entity Anna : character;
+entity Babish : character;
+entity Charlotte : character;
+
+entity world:world;
+entity pirates:pirate;
+
+entity  ship : place;
+entity  pirateBase : place;
+entity  treasurePlace : place;
+
+
+		   
+
+		   world_state(world) = 2 ;
+pirates_relation(pirates) = 1 ;
+pirates_power(pirates) = 2 ;
+pirates_treasure(pirates) = 0 ;
+pirates_knows_location_treasure(pirates) = 1 ;
+power(Anna) = 0 ;
+injured(Anna) = 0 ;
+state(Anna) = 2 ;
+at(Anna) = ship ;
+treasure(Anna) = 0 ;
+altruism(Anna) = 1 ;
+ambition(Anna) = 0 ;
+knows_location_treasure(Anna) = 0 ;
+has_access_pirates(Anna) = 0 ;
+power(Babish) = 1 ;
+injured(Babish) = 0 ;
+state(Babish) = 0 ;
+at(Babish) = ship ;
+treasure(Babish) = 0 ;
+altruism(Babish) = 1 ;
+ambition(Babish) = 0 ;
+knows_location_treasure(Babish) = 0 ;
+has_access_pirates(Babish) = 0 ;
+power(Charlotte) = 1 ;
+injured(Charlotte) = 0 ;
+state(Charlotte) = 2 ;
+at(Charlotte) = ship ;
+treasure(Charlotte) = 1 ;
+altruism(Charlotte) = 1 ;
+ambition(Charlotte) = 0 ;
+knows_location_treasure(Charlotte) = 0 ;
+has_access_pirates(Charlotte) = 0 ;
+distraction(ship) = 0 ;
+distraction(pirateBase) = 0 ;
+distraction(treasurePlace) = 0 ;
+
+action travel(character : character,  to : place){
+	precondition:
+		(
+		(to==pirateBase & has_access_pirates(character)==1)
+		|
+		(to==treasurePlace & knows_location_treasure(character) ==1)
+		|
+		(to==ship)
+		)
+		& character == Charlotte
+		;
+	effect:
+		later(world)&
+		at(character) = to;
+	consenting: character; 
+	
+};
+
+action distraction(character : character,  place : place){
+	precondition:
+		at(character) == place & character == Charlotte;
+		
+	effect:
+		distraction(place) =1 & later(world);
+	consenting: character; 
+	
+};
+
+action stun(character : character,character2 : character, place : place){
+	precondition:
+		at(character) == place &
+		at(character2) == place &
+		distraction(place)==1 &
+		character != character2 
+		
+		& character == Charlotte;
+		
+	effect:
+		if (altruism(character) > 0)
+			satisfaction(character) = satisfaction(character) - 1 
+		&state(character2) = 2
+		& later(world);
+	consenting: character; 
+	
+};
+
+
+action escape(character : character){
+	precondition:
+		at(character) == ship &
+		distraction(ship) == 1
+		
+		
+		& character == Charlotte;
+		
+	effect:
+		if (ambition(character) == 0 | injured(character) == 1) 
+			satisfaction(character) = satisfaction(character) + 1
+		& later(world);
+	consenting: character; 
+	
+};
+
+action escape_pirates_help(character : character){
+	precondition:
+		at(character) == ship &
+		(distraction(ship) == 1 & pirates_relation(pirates) == 1) |
+		pirates_power(pirates) == 0 |
+		world_state(world) > 0 
+		
+		& character == Charlotte;
+		
+	effect:
+		if (ambition(character) == 0 | injured(character) == 1) 
+			satisfaction(character) = satisfaction(character) + 1
+		& later(world);
+	consenting: character; 
+	
+};
+action take_treasure_char(character : character,character2 : character, place : place){
+	precondition:
+		at(character) == place &
+		at(character2) == place &
+		state(character2) == 2 &
+		character != character2 &
+		treasure(character2) > 0
+		& character == Charlotte;
+		
+	effect:
+		if (altruism(character) > 0)
+			satisfaction(character) = satisfaction(character) - 1 
+		&
+		if (ambition(character) > 0)
+			satisfaction(character) = satisfaction(character) + 1 
+		&
+		treasure(character2) = treasure(character2) - 1 &
+		treasure(character) = treasure(character) + 1
+		& later(world);
+	consenting: character; 
+	
+};
+
+action take_treasure_location_char(character : character,character2 : character, place : place){
+	precondition:
+		at(character) == place &
+		at(character2) == place &
+		state(character2) == 2 &
+		character != character2 &
+		knows_location_treasure(character2)==1
+		& character == Charlotte;
+		
+	effect:
+		if (altruism(character) > 0)
+			satisfaction(character) = satisfaction(character) - 1 
+		&
+		
+		knows_location_treasure(character)=1
+		& later(world);
+	consenting: character; 
+	
+};
+
+action get_access_pirates(character : character){
+	precondition:
+		pirates_relation(pirates) == 1 |
+		pirates_power(pirates) == 0 |
+		world_state(world) > 0 
+		& character == Charlotte
+		;
+	effect:
+		later(world)&
+		has_access_pirates(character) = 1;
+	consenting: character; 
+	
+};
+
+action tell_treasure_location(character : character,character2 : character){
+	precondition:
+		
+		knows_location_treasure(character)==1
+		& character == Charlotte
+		;
+	effect:
+		later(world)&
+		knows_location_treasure(character2)=1;
+	consenting: character; 
+	
+};
+
+
+action get_treasure(character : character){
+	precondition:
+		
+		knows_location_treasure(character)==1
+		&treasure(character) < 2
+		& character == Charlotte
+		;
+	effect:
+	
+		if (ambition(character) > 0)
+			satisfaction(character) = satisfaction(character) + 1 
+		&
+		later(world)&
+		treasure(character) = treasure(character) + 1;
+	consenting: character; 
+	
+};
+
+action give_pirates_treasure_location(character : character){
+	precondition:
+		pirates_knows_location_treasure(pirates)==0 &
+		knows_location_treasure(character)==1
+		& character == Charlotte
+		& at(character) == pirateBase
+		;
+	effect:
+		later(world)&
+		pirates_knows_location_treasure(pirates)==1 &
+		pirates_relation(pirates) = pirates_relation(pirates) + 1;
+	consenting: character; 
+	
+};
+
+
+action give_pirates_treasure(character : character){
+	precondition:
+		treasure(character) > 0
+		& character == Charlotte
+		& at(character) == pirateBase
+		;
+	effect:
+		if (ambition(character) > 0)
+			satisfaction(character) = satisfaction(character) - 1 
+		&
+		later(world)&
+		treasure(character) = treasure(character) - 1 &
+		pirates_treasure(pirates) = pirates_treasure(pirates) + 1 &
+		pirates_relation(pirates) = pirates_relation(pirates) + 1;
+	consenting: character; 
+	
+};
+
+action take_pirates_treasure(character : character){
+	precondition:
+		has_access_pirates(character) == 1
+		& pirates_treasure(pirates) > 0
+		& character == Charlotte
+		;
+	effect:
+		if (ambition(character) > 0)
+			satisfaction(character) = satisfaction(character) + 1 
+		&
+		later(world)&
+		treasure(character) = treasure(character) + 1 &
+		pirates_treasure(pirates) = pirates_treasure(pirates) - 1 &
+		pirates_relation(pirates) = pirates_relation(pirates) - 1;
+	consenting: character; 
+	
+};
+
+
+
+action attack_pirateBase(character : character){
+	precondition:
+		power(character) > 0
+		& character == Charlotte
+		;
+	effect:
+		later(world)&
+		pirates_power(pirates) = pirates_power(pirates) - 1
+		 ; 
+	consenting: character; 
+	
+};
+
+action train(character : character){
+	precondition:
+		 character == Charlotte
+		;
+	effect:
+		later(world)&
+		power(character) = power(character) + 1
+		 ; 
+	consenting: character; 
+	
+};
+
+
+action take_treasure_pirates(character : character){
+	precondition:
+		((pirates_power(pirates) == 0 ) | distraction(pirateBase) == 1 )
+		& at(character) == pirateBase
+		& character == Charlotte
+		& pirates_treasure(pirates) > 0
+		;
+	effect:
+	
+		if (ambition(character) > 0)
+			satisfaction(character) = satisfaction(character) + 1 
+		&
+		later(world)&
+		pirates_treasure(pirates) = pirates_treasure(pirates) - 1
+		&treasure(character) = treasure(character) + 1
+
+		 ; 
+	consenting: character; 
+	
+};
+
+
+
+			utility(): 
+ satisfaction(Charlotte);
+utility(Anna): 
+ satisfaction(Anna);
+utility(Babish): 
+ satisfaction(Babish);
+utility(Charlotte): 
+ satisfaction(Charlotte);

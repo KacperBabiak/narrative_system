@@ -1,0 +1,51 @@
+actions,char
+"action predictaction_1_travel(char1 : character){ 
+ precondition: 
+later(world) & 
+( ( at(char1)==treasure_place| at(char1)==pirate_base) |
+( at(char1)==treasure_place| at(char1)==pirate_base)) & 
+( ambition(char1)=0) ; 
+ effect: 
+ at(char1) == ship 
+}; 
+",char1
+"action predictaction_1_travel(char1 : character){ 
+ precondition: 
+later(world) & 
+( ( at(char1)==treasure_place| at(char1)==pirate_base) |
+( at(char1)==treasure_place| at(char1)==pirate_base)) & 
+( ambition(char1)=0) ; 
+ effect: 
+ at(char1) == ship 
+}; 
+",char1
+"action predictaction_1_travel(char1 : character){ 
+ precondition: 
+later(world) & 
+( ( at(char1)==treasure_place| at(char1)==pirate_base) |
+( at(char1)==treasure_place| at(char1)==pirate_base)) & 
+( ambition(char1)=0) ; 
+ effect: 
+ at(char1) == ship 
+}; 
+",char1
+"action predictaction_1_travel(char1 : character){ 
+ precondition: 
+later(world) & 
+( ( at(char1)==treasure_place| at(char1)==pirate_base) |
+( at(char1)==treasure_place| at(char1)==pirate_base)) & 
+( ambition(char1)=0) ; 
+ effect: 
+ at(char1) == ship 
+}; 
+",char1
+"action predictaction_1_travel(char1 : character){ 
+ precondition: 
+later(world) & 
+( ( at(char1)==treasure_place| at(char1)==pirate_base) |
+( at(char1)==treasure_place| at(char1)==pirate_base)) & 
+( ambition(char1)=0) ; 
+ effect: 
+ at(char1) == ship 
+}; 
+",char1

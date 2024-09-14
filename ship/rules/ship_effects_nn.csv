@@ -1,0 +1,30 @@
+action,effect,effect_function,effect_args
+test,at(character) = to;,arg1_at:=_arg3,at(arg1) = arg3;
+travel,at(character) = to;,arg1_at:=_arg2,at(arg1) = arg2;
+distraction,distraction(place) =1;,arg2_distraction:=1,distraction(arg2) =1;
+stun,state(character2) = 2;,arg2_state:=2,state(arg2) = 2;
+escape,satisfaction(character) = satisfaction(character) + 1;,arg1_satisfaction:=1,satisfaction(arg1) = satisfaction(arg1) + 1;
+escape_pirates_help,satisfaction(character) = satisfaction(character) + 1;,arg1_satisfaction:=1,satisfaction(arg1) = satisfaction(arg1) + 1;
+take_treasure_char,"treasure(character2) = treasure(character2) - 1 ;
+treasure(character) = treasure(character) + 1;",arg1_treasure:+1;arg2_treasure:-1,"treasure(arg2) = treasure(arg2) - 1 ;
+treasure(arg1) = treasure(arg1) + 1;"
+take_treasure_location_char,knows_location_treasure(character)=1;,arg1_knows_location_treasure:=1,knows_location_treasure(arg1)=1;
+get_access_pirates,has_access_pirates(character) = 1;,arg1_has_access_pirates:=1,has_access_pirates(arg1) = 1;
+tell_treasure_location,knows_location_treasure(character2)=1;,arg2_knows_location_treasure:=1,knows_location_treasure(arg2)=1;
+get_treasure,treasure(character) = treasure(character) + 1;,arg1_treasure:+1,treasure(arg1) = treasure(arg1) + 1;
+give_pirates_treasure_location,"pirates_knows_location_treasure(pirates)=1;
+pirates_relation(pirates) = pirates_relation(pirates) + 1;",pirates_knows_location_treasure:=1;pirates_relation:+1,"pirates_knows_location_treasure(pirates)=1;
+pirates_relation(pirates) = pirates_relation(pirates) + 1;"
+give_pirates_treasure,"treasure(character) = treasure(character) - 1 ;
+pirates_treasure(pirates) = pirates_treasure(pirates) + 1 ;
+pirates_relation(pirates) = pirates_relation(pirates) + 1;",arg1_treasure:-1; pirates_treasure:+1;pirates_relation:+1,"treasure(arg1) = treasure(arg1) - 1 ;
+pirates_treasure(pirates) = pirates_treasure(pirates) + 1 ;
+pirates_relation(pirates) = pirates_relation(pirates) + 1;"
+take_pirates_treasure,"treasure(character) = treasure(character) + 1 ;
+pirates_treasure(pirates) = pirates_treasure(pirates) - 1 ;
+pirates_relation(pirates) = pirates_relation(pirates) - 1;",arg1_treasure:+1; pirates_treasure:-;pirates_relation:-1,"treasure(arg1) = treasure(arg1) + 1 ;
+pirates_treasure(pirates) = pirates_treasure(pirates) - 1 ;
+pirates_relation(pirates) = pirates_relation(pirates) - 1;"
+wait_for_night,world_state(world) =  1 ; ,world_state:=1,world_state(world) =  1 ; 
+attack_pirate_base,pirates_power(pirates) = pirates_power(pirates) - 1;,pirates_power:-1,pirates_power(pirates) = pirates_power(pirates) - 1;
+train,power(character) = power(character) + 1;,arg1_power:=1,power(arg1) = power(arg1) + 1;
